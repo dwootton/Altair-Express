@@ -36,7 +36,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
     
     if interactive:
 
-      x_brush = alt.selection_interval(encodings=['x'],resolve="union",name='x_brush')
+      x_brush = alt.selection_interval(encodings=['x'],resolve="union",name='brush')
       
       if isinstance(interactive,alt.Selection):
         x_brush = interactive     
@@ -55,7 +55,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
     
     if interactive:
 
-      y_brush = alt.selection_interval(encodings=['y'],resolve="union",name='y_brush')
+      y_brush = alt.selection_interval(encodings=['y'],resolve="union",name='brush')
       
       if isinstance(interactive,alt.Selection):
         y_brush = interactive     
@@ -63,23 +63,6 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
       
       layers['fg'] =  layers['fg'].add_selection(y_brush)
       filters.append(y_brush)
-
-      print(len(filters))
-
-    
-  # elif x is None and y is not None:
-
-  #   chart =  alt.Chart(data).mark_bar(color=fill).encode(
-  #     alt.Y(f'{y}:Q', bin=True, axis=yAxis),alt.X('count()',axis=xAxis)
-  #       )
-  #   if interactive:
-  #     y_brush = alt.selection_interval(encodings=['y'],resolve="global",name='y_brush')
-  #     if isinstance(interactive,alt.Selection):
-  #       y_brush = interactive 
-  #     chart = chart.mark_bar(color='lightgray')
-  #     chart = chart + alt.Chart(data).mark_bar(color=fill).encode(
-  #         alt.Y(f'{y}:Q', bin=True, axis=yAxis),alt.X('count()',axis=xAxis)
-  #     ).add_selection(y_brush).transform_filter(y_brush)
   
 
   if filters:
@@ -116,7 +99,6 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
 
     # filter to only one variable
     if variable is not None:
-      print(f'filtering to {variable}')
       base=base.transform_filter(
           alt.FieldEqualPredicate(field=groupby, equal=variable)
       )
