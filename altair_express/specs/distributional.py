@@ -1,15 +1,6 @@
-"""Main module."""
-
 import altair as alt
 import pandas as pd
-import numpy as np
 
-
-
-
-
-
-# Hist
 def create_hist_dataframe(data=None, *, x=None, y=None):
   # create data if x and y are pandas series
   if data is None:
@@ -101,3 +92,100 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
       )
 
 
+
+
+
+def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True)):
+  facet_vars = [None]
+  if groupby:
+    facet_vars=np.unique(data[groupby])
+
+  brush = alt.selection_interval(
+    name='brush',
+    encodings=['y'],
+    empty="all"
+  )
+
+  charts =[]
+
+  for index,variable in enumerate(facet_vars):
+    # filter to unique value
+    base = alt.Chart(data=data)
+
+    # filter to only one variable
+    if variable is not None:
+      print(f'filtering to {variable}')
+      base=base.transform_filter(
+          alt.FieldEqualPredicate(field=groupby, equal=variable)
+      )
+
+    if yAxis is None:
+      if index == 0:
+        yAxis = alt.Axis(grid=False, ticks=True)
+    else:
+      if index != 0:
+        yAxis = None
+          
+
+
+    base = base.transform_density(
+        'Miles_per_Gallon',
+        as_=['Miles_per_Gallon', 'density'],
+        extent=[5, 55],
+    ).transform_stack(
+        stack= "density",
+        groupby= ["Miles_per_Gallon"],
+      as_= ["x", "x2"],
+      offset= "center"
+    )
+
+    layers = {'fg':None,'bg':None}
+    # for each value in origin, 
+      # create layered plot
+    # concat plots together
+
+    layers['bg'] = base.mark_area(color="lightgray",
+                                  ).encode(
+                    
+        y=alt.Y('Miles_per_Gallon:Q',axis=yAxis),
+        x=alt.X(
+            field='x',
+            impute=None,
+            title=None,
+            type ="quantitative",
+            axis=xAxis,
+        ),
+            x2=alt.X2(field = "x2")
+
+    )
+
+
+
+    layers['fg'] = base.mark_area(orient='horizontal', align="center",
+                                  ).encode(
+        y=alt.Y('Miles_per_Gallon:Q',axis=yAxis),
+        x=alt.X(
+            field='x',
+            impute=None,
+            title=None,
+            type ="quantitative",
+                        axis=xAxis,
+
+        ),
+        x2=alt.X2(field = "x2")
+    ).add_selection(
+        brush
+    ).transform_filter(
+        brush
+    )
+
+    chrt = layers['bg'] + layers['fg']
+    charts.append(chrt.properties(width=100))
+
+  final_chart = None
+  for chart in charts:
+    if final_chart is None:
+      final_chart = chart
+    else:
+      final_chart = alt.hconcat(final_chart,chart,spacing=0)
+  return final_chart
