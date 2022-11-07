@@ -36,13 +36,13 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
     
     if interactive:
 
-      x_brush = alt.selection_interval(encodings=['x'],resolve="union",name='brush')
+      brush = alt.selection_interval(encodings=['x'],resolve="union",name='brush')
       
       if isinstance(interactive,alt.Selection):
-        x_brush = interactive     
+        brush = interactive     
       
-      layers['fg'] =  layers['fg'].add_selection(x_brush)
-      filters.append(x_brush)
+      layers['fg'] =  layers['fg'].add_selection(brush)
+      filters.append(brush)
 
 
   elif x is  None and y is not None:
@@ -55,14 +55,14 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
     
     if interactive:
 
-      y_brush = alt.selection_interval(encodings=['y'],resolve="union",name='brush')
+      brush = alt.selection_interval(encodings=['y'],resolve="union",name='brush')
       
       if isinstance(interactive,alt.Selection):
-        y_brush = interactive     
+        brush = interactive     
 
       
-      layers['fg'] =  layers['fg'].add_selection(y_brush)
-      filters.append(y_brush)
+      layers['fg'] =  layers['fg'].add_selection(brush)
+      filters.append(brush)
   
 
   if filters:
