@@ -1,10 +1,10 @@
 import altair as alt
-from ..distributional import hist
-from ..relational import scatterplot
+from .distributional import hist
+from .relational import scatterplot
 import numpy as np
 
 #chart constructor that will add in interactions 
-def pair_grid(data=None,variables=None):
+def pair_plot(data=None,variables=None):
   if data is None:
     raise ValueError('[pairgrid] data cannot be null')
 
