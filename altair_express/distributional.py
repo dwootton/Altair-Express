@@ -1,5 +1,7 @@
 import altair as alt
 import pandas as pd
+import numpy as np
+
 
 def create_hist_dataframe(data=None, *, x=None, y=None):
   # create data if x and y are pandas series
