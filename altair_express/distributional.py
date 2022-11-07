@@ -78,8 +78,6 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
 
 
 
-
-
 def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True)):
   facet_vars = [None]
   if groupby:
@@ -113,12 +111,12 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
 
 
     base = base.transform_density(
-        'Miles_per_Gallon',
-        as_=['Miles_per_Gallon', 'density'],
+        y,
+        as_=[y, 'density'],
         extent=[5, 55],
     ).transform_stack(
         stack= "density",
-        groupby= ["Miles_per_Gallon"],
+        groupby= [y],
       as_= ["x", "x2"],
       offset= "center"
     )
@@ -131,7 +129,7 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
     layers['bg'] = base.mark_area(color="lightgray",
                                   ).encode(
                     
-        y=alt.Y('Miles_per_Gallon:Q',axis=yAxis),
+        y=alt.Y(f'{y}:Q',axis=yAxis),
         x=alt.X(
             field='x',
             impute=None,
@@ -147,7 +145,7 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
 
     layers['fg'] = base.mark_area(orient='horizontal', align="center",
                                   ).encode(
-        y=alt.Y('Miles_per_Gallon:Q',axis=yAxis),
+        y=alt.Y(f'{y}:Q',axis=yAxis),
         x=alt.X(
             field='x',
             impute=None,
@@ -162,9 +160,9 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
     ).transform_filter(
         brush
     )
-
+                    
     chrt = layers['bg'] + layers['fg']
-    charts.append(chrt.properties(width=100))
+    charts.append(chrt.properties(width=100,title = alt.TitleParams(text = variable )))
 
   final_chart = None
   for chart in charts:
