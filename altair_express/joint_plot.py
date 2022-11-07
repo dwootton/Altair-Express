@@ -1,6 +1,6 @@
 import altair as alt
-from ..distributional import hist
-from ..relational import scatterplot
+from .distributional import hist
+from .relational import scatterplot
 
 def joint_plot(data=None,x=None, y=None,width=200,height=200):
   x_brush = alt.selection_interval(encodings=['x'],resolve="union",name="brush")
