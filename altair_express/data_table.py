@@ -51,7 +51,6 @@ def data_table(data=None,vars=None,row_limit=25):
       
       charts[chart_index] = alt.vconcat(charts[chart_index],bounds, spacing=0)
     else:
-      print(f'not numeric {variable}')
       # append blank till count plot are ready
       spacer = countplot(data=data,x=variable,interactive=picker,width=column_width,height=50,filters=[brush],xAxis=None,yAxis=None)
       signal_index = False

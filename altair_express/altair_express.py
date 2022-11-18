@@ -71,8 +71,6 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
       layers['fg'] =  layers['fg'].add_selection(y_brush)
       filters.append(y_brush)
 
-      print(len(filters))
-
     
   # elif x is None and y is not None:
 

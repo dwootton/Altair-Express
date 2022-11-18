@@ -72,14 +72,21 @@ def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=alt.Color(),
   y_type = data_type_converter(data.dtypes[y])
 
   
-  base =  alt.Chart(data).mark_circle().encode(
+  layers = {"fg":alt.Chart(data).mark_circle().encode(
       alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
       alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
-  )
+  ),"bg":alt.Chart(data).mark_circle(color='lightgray').encode(
+      alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
+      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
+  )} 
 
-  layers = {"fg":base,"bg":base.mark_circle(color='lightgray')} 
+  if color:
+    if color not in data.columns:
+        layers['fg']=layers['fg'].mark_circle(fill=color)
+    else:
+        layers['fg']=layers['fg'].encode(alt.Color(field=color))
 
-  
+
   if interactive:
       x_y_brush = alt.selection_interval(encodings=['x','y'],resolve="intersect",name='brush')
       if type(interactive) == type(alt.selection_interval()):
