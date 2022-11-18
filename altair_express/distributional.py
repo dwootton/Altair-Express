@@ -38,7 +38,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
 
       brush = alt.selection_interval(encodings=['x'],resolve="union",name='brush')
       
-      if isinstance(interactive,alt.Selection):
+      if type(interactive) == type(alt.selection_interval()):
         brush = interactive     
       
       layers['fg'] =  layers['fg'].add_selection(brush)
@@ -57,7 +57,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
 
       brush = alt.selection_interval(encodings=['y'],resolve="union",name='brush')
       
-      if isinstance(interactive,alt.Selection):
+      if type(interactive) == type(alt.selection_interval()):
         brush = interactive     
 
       
@@ -194,7 +194,7 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=Fa
 
   if interactive:
       x_brush = alt.selection_multi(name='brush',encodings=['x'],resolve='union')
-      if isinstance(interactive,alt.Selection):
+      if type(interactive) ==type(alt.selection_interval()):
         x_brush = interactive     
       
       layers['bg'] =  layers['bg'].add_selection(x_brush)

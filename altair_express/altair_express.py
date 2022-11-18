@@ -45,7 +45,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
 
       x_brush = alt.selection_interval(encodings=['x'],resolve="union",name='x_brush')
       
-      if isinstance(interactive,alt.Selection):
+      if type(interactive) == type(alt.selection_interval()):
         x_brush = interactive     
       
       layers['fg'] =  layers['fg'].add_selection(x_brush)
@@ -64,7 +64,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
 
       y_brush = alt.selection_interval(encodings=['y'],resolve="union",name='y_brush')
       
-      if isinstance(interactive,alt.Selection):
+      if type(interactive) == type(alt.selection_interval()):
         y_brush = interactive     
 
       
@@ -81,7 +81,7 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill
   #       )
   #   if interactive:
   #     y_brush = alt.selection_interval(encodings=['y'],resolve="global",name='y_brush')
-  #     if isinstance(interactive,alt.Selection):
+  #     if type(interactive) == type(alt.selection_interval()):
   #       y_brush = interactive 
   #     chart = chart.mark_bar(color='lightgray')
   #     chart = chart + alt.Chart(data).mark_bar(color=fill).encode(

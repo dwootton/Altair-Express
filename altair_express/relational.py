@@ -44,7 +44,7 @@ def lineplot(data=None, *, x=None, y=None,color=None,filters=None,interactive=No
   if interactive:
     # default to interval selection
     x_brush = alt.selection_interval(encodings=['x'],resolve="intersect",name='brush')
-    if isinstance(interactive,alt.Selection):
+    if type(interactive) == type(alt.selection_interval()):
         x_brush = interactive  
 
     layers['fg']=layers['fg'].add_selection(x_brush)  
@@ -63,16 +63,35 @@ def lineplot(data=None, *, x=None, y=None,color=None,filters=None,interactive=No
 
   return chart.properties(width=width,height=height)
 
-def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=alt.Color(),yAxis=alt.Axis(),fill="steelblue",interactive=None,width=200,height=200):
+def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=alt.Color(),yAxis=alt.Axis(),filters=None,fill="steelblue",interactive=None,width=200,height=200):
+  if filters is None:
+    filters = []
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
   x_type = data_type_converter(data.dtypes[x])
   y_type = data_type_converter(data.dtypes[y])
-  
-  chart =  alt.Chart(data).mark_circle().encode(
-    alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
-      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
-    color=color
-  ).properties(width=width,height=height)
 
-  return chart
+  
+  base =  alt.Chart(data).mark_circle().encode(
+      alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
+      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
+  )
+
+  layers = {"fg":base,"bg":base.mark_circle(color='lightgray')} 
+
+  
+  if interactive:
+      x_y_brush = alt.selection_interval(encodings=['x','y'],resolve="intersect",name='brush')
+      if type(interactive) == type(alt.selection_interval()):
+        x_y_brush = interactive     
+      layers['bg'] =  layers['bg'].add_selection(x_y_brush)
+      filters.append(x_y_brush)
+  
+
+  if filters:
+    for filter in filters:
+      layers['fg'] = layers['fg'].transform_filter(filter)
+
+  chart = layers['bg'] + layers['fg']
+
+  return chart.properties(width=width,height=height)
