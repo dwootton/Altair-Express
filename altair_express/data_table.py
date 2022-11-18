@@ -1,8 +1,8 @@
 import altair as alt
 from .distributional import hist, countplot
 from pandas.api.types import is_numeric_dtype
-from pandas import pd
-from numpy import np
+import pandas as pd
+import numpy as np
 
 def data_table(data=None,vars=None,row_limit=25):
   if vars is None:
