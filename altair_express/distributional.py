@@ -19,7 +19,10 @@ def create_hist_dataframe(data=None, *, x=None, y=None):
   
   return data,x,y
 
-def hist(data=None,x=None,y=None, width=200,height=50,filters=[],color=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis(),interactive=False):
+def hist(data=None,x=None,y=None, width=200,height=50,filters=None,color=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis(),interactive=False):
+  if filters is None:
+    filters = []
+    
   # ensures that data is the data and x and y are column names
   data,x,y = create_hist_dataframe(data=data,x=x,y=y) 
   chart = None

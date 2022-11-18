@@ -1,5 +1,6 @@
 import altair as alt
 from .utils import data_type_converter, create_dataframe
+import numpy as np
 
 def relplot(data=None, *, x=None, y=None,color=None,interactive=None,kind="scatter",width=200,height=200):
 
@@ -63,7 +64,7 @@ def lineplot(data=None, *, x=None, y=None,color=None,filters=None,interactive=No
 
   return chart.properties(width=width,height=height)
 
-def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=alt.Color(),yAxis=alt.Axis(),filters=None,fill="steelblue",interactive=None,width=200,height=200):
+def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=None,yAxis=alt.Axis(),filters=None,fill="steelblue",interactive=None,width=200,height=200):
   if filters is None:
     filters = []
   data, x, y = create_dataframe(data=data,x=x,y=y)
