@@ -171,3 +171,41 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
     else:
       final_chart = alt.hconcat(final_chart,chart,spacing=0)
   return final_chart
+
+
+def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=False, filters=[],width=250,height=150, max_bars = None):
+  if data is None:
+    if x is None:
+      raise ValueError('[countplot] no data or data series provided.')
+    data = pd.DataFrame({})
+    if isinstance(x, pd.Series):
+      data['x'] = x
+      x = 'x'
+
+  layers = {"fg":alt.Chart(data).mark_bar(color="steelblue")
+    .encode(
+      alt.X(f'{x}:N',axis=xAxis), # remove the sort as that will keep it consistent with the background
+            alt.Y(f'count({x}):Q',axis=yAxis)
+  ),"bg":alt.Chart(data).mark_bar(color="lightgray")
+    .encode(
+      alt.X(f'{x}:N',sort='-y',axis=xAxis), 
+      alt.Y(f'count({x}):Q',axis=yAxis)
+  )}
+
+  if interactive:
+      x_brush = alt.selection_multi(name='brush',encodings=['x'],resolve='union')
+      if isinstance(interactive,alt.Selection):
+        x_brush = interactive     
+      
+      layers['bg'] =  layers['bg'].add_selection(x_brush)
+      filters.append(x_brush)
+   
+  if filters:
+     for filter in filters:
+        layers['fg'] = layers['fg'].transform_filter(filter)
+
+  chart = layers['bg'] + layers['fg'] 
+  return chart.properties(
+          width=width,
+          height=height
+      )

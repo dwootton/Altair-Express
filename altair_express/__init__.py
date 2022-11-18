@@ -8,3 +8,4 @@ from .joint_plot import *
 from .pair_plot import *
 from .distributional import *
 from .relational import *
+from .data_table import *
