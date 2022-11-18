@@ -81,7 +81,10 @@ def hist(data=None,x=None,y=None, width=200,height=50,filters=None,color=None,fi
 
 
 
-def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True)):
+def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True),interactive=False,filters=None):
+  if filters is None:
+    filters = []
+
   facet_vars = [None]
   if groupby:
     facet_vars=np.unique(data[groupby])
@@ -111,9 +114,17 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
       if index != 0:
         yAxis = None
           
+    
+    
+    
 
+    layers = {'fg':None,'bg':None}
+    # for each value in origin, 
+      # create layered plot
+    # concat plots together
 
-    base = base.transform_density(
+    layers['bg'] = base.mark_area(color="lightgray",
+                                  ).transform_density(
         y,
         as_=[y, 'density'],
         extent=[5, 55],
@@ -122,15 +133,7 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
         groupby= [y],
       as_= ["x", "x2"],
       offset= "center"
-    )
-
-    layers = {'fg':None,'bg':None}
-    # for each value in origin, 
-      # create layered plot
-    # concat plots together
-
-    layers['bg'] = base.mark_area(color="lightgray",
-                                  ).encode(
+    ).encode(
                     
         y=alt.Y(f'{y}:Q',axis=yAxis),
         x=alt.X(
@@ -145,8 +148,31 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
     )
 
 
+    layers['fg'] = base
+    if interactive:
+      if type(interactive) == type(alt.selection_interval()):
+        brush = interactive     
+      layers['bg'] =  layers['bg'].add_selection(brush)
+      filters.append(brush)
+  
 
-    layers['fg'] = base.mark_area(orient='horizontal', align="center",
+    if filters:
+      for filter in filters:
+        layers['fg'] = layers['fg'].transform_filter(filter)
+    
+    
+    layers['fg'] =layers['fg'].transform_density(
+        y,
+        as_=[y, 'density'],
+        extent=[5, 55],
+    ).transform_stack(
+        stack= "density",
+        groupby= [y],
+      as_= ["x", "x2"],
+      offset= "center"
+    )
+
+    layers['fg'] = layers['fg'].mark_area(orient='horizontal', align="center",
                                   ).encode(
         y=alt.Y(f'{y}:Q',axis=yAxis),
         x=alt.X(
@@ -158,12 +184,8 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
 
         ),
         x2=alt.X2(field = "x2")
-    ).add_selection(
-        brush
-    ).transform_filter(
-        brush
     )
-                    
+                  
     chrt = layers['bg'] + layers['fg']
     charts.append(chrt.properties(width=100,title = alt.TitleParams(text = variable )))
 
