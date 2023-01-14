@@ -1,5 +1,5 @@
 import altair as alt
-from .distributional import hist
+from ..distributional import hist
 from .relational import scatterplot
 
 def jointplot(data=None,x=None, y=None):

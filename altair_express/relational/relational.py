@@ -1,5 +1,5 @@
 import altair as alt
-from .utils import data_type_converter, create_dataframe
+from ..utils import data_type_converter, create_dataframe
 import numpy as np
 
 def relplot(data=None, *, x=None, y=None,color=None,interactive=None,kind="scatter",width=200,height=200):

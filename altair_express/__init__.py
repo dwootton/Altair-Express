@@ -4,8 +4,9 @@ __author__ = """Dylan Wootton"""
 __email__ = 'dwootton@mit.edu'
 __version__ = '0.1.18'
 
-from .joint_plot import *
+from .relational.joint_plot import *
 from .pair_plot import *
 from .distributional import *
-from .relational import *
+from .relational.relational import *
 from .data_table import *
+from .interactions import *

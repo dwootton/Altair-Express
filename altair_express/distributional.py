@@ -2,7 +2,6 @@ import altair as alt
 import pandas as pd
 import numpy as np
 
-
 def create_hist_dataframe(data=None, *, x=None, y=None):
   # create data if x and y are pandas series
   if data is None:
@@ -198,7 +197,10 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
   return final_chart
 
 
-def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=False, filters=[],width=250,height=150, max_bars = None):
+def countplot(data=None,x=None,y=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=False, filters=None,width=250,height=150, max_bars = None):
+  if filters is None:
+    filters = []
+
   if data is None:
     if x is None:
       raise ValueError('[countplot] no data or data series provided.')
@@ -207,29 +209,17 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=Fa
       data['x'] = x
       x = 'x'
 
-  layers = {"fg":alt.Chart(data).mark_bar(color="steelblue")
-    .encode(
+  # if x 
+  chart = alt.Chart(data).mark_bar().encode(
       alt.X(f'{x}:N',axis=xAxis), # remove the sort as that will keep it consistent with the background
-            alt.Y(f'count({x}):Q',axis=yAxis)
-  ),"bg":alt.Chart(data).mark_bar(color="lightgray")
-    .encode(
-      alt.X(f'{x}:N',sort='-y',axis=xAxis), 
       alt.Y(f'count({x}):Q',axis=yAxis)
-  )}
-
-  if interactive:
-      x_brush = alt.selection_multi(name='brush',encodings=['x'],resolve='union')
-      if type(interactive) ==type(alt.selection_interval()):
-        x_brush = interactive     
-      
-      layers['bg'] =  layers['bg'].add_selection(x_brush)
-      filters.append(x_brush)
+  )
    
   if filters:
      for filter in filters:
-        layers['fg'] = layers['fg'].transform_filter(filter)
+        chart=chart.transform_filter(filter)
 
-  chart = layers['bg'] + layers['fg'] 
+  
   return chart.properties(
           width=width,
           height=height

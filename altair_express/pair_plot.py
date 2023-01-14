@@ -1,6 +1,6 @@
 import altair as alt
 from .distributional import hist
-from .relational import scatterplot
+from .relational.relational import scatterplot
 import numpy as np
 
 def pairplot(data=None,variables=None):
