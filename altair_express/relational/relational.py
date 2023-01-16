@@ -1,4 +1,6 @@
 import altair as alt
+
+from altair_express.interactions import process_effects
 from ..utils import data_type_converter, create_dataframe
 import numpy as np
 
@@ -64,42 +66,28 @@ def lineplot(data=None, *, x=None, y=None,color=None,filters=None,interactive=No
 
   return chart.properties(width=width,height=height)
 
-def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=None,yAxis=alt.Axis(),filters=None,fill="steelblue",interactive=None,width=200,height=200):
-  if filters is None:
-    filters = []
+def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=None,yAxis=alt.Axis(),effects=None,fill="steelblue",width=200,height=200):
+
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
   x_type = data_type_converter(data.dtypes[x])
   y_type = data_type_converter(data.dtypes[y])
 
   
-  layers = {"fg":alt.Chart(data).mark_circle().encode(
+  chart = alt.Chart(data).mark_circle().encode(
       alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
       alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
-  ),"bg":alt.Chart(data).mark_circle(color='lightgray').encode(
-      alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
-      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
-  )} 
+  )
 
   if color:
     if color not in data.columns:
-        layers['fg']=layers['fg'].mark_circle(fill=color)
+        chart=chart.mark_circle(fill=color)
     else:
-        layers['fg']=layers['fg'].encode(alt.Color(field=color))
+        chart=chart.encode(alt.Color(field=color))
 
-
-  if interactive:
-      x_y_brush = alt.selection_interval(encodings=['x','y'],resolve="intersect",name='brush')
-      if type(interactive) == type(alt.selection_interval()):
-        x_y_brush = interactive     
-      layers['bg'] =  layers['bg'].add_selection(x_y_brush)
-      filters.append(x_y_brush)
+  if effects:
+    chart = process_effects(chart,effects)
   
 
-  if filters:
-    for filter in filters:
-      layers['fg'] = layers['fg'].transform_filter(filter)
-
-  chart = layers['bg'] + layers['fg']
 
   return chart.properties(width=width,height=height)

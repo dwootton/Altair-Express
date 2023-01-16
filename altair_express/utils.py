@@ -1,16 +1,28 @@
 import numpy as np
 import pandas as pd
 import altair as alt
+def add_encoding(chart,color):
+    if getattr(chart,'encode',None):
+        chart= chart.encode(color=color)
+    else:
+      attributes_for_recursion = ['hconcat','vconcat']
+      for attribute in attributes_for_recursion:
+          if alt_get(chart,attribute):
+            # TODO, make this recursive instead of one layer deep
+            for unit_chart in chart[attribute]:
+              unit_chart  = unit_chart.encode(color=color)
+    return chart
+
+    #chart = add_encoding(chart,{'color':color})
 
 def is_axis_aggregate(chart,axis):
-    if is_undefined(chart.encoding):
+    if not getattr(chart,'encoding',None) or is_undefined(chart.encoding):
         return False
     
     encoding = chart.encoding[axis]
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:
-        print((chart.to_dict()['encoding']).get(axis))
         axis_encode = chart.to_dict()['encoding'].get(axis)
         if axis_encode is None:
             return False
@@ -22,20 +34,67 @@ def is_axis_aggregate(chart,axis):
         return True
     else: 
         return False
+
+def is_axis_binned(chart,axis):
+    if not getattr(chart,'encoding',None) or is_undefined(chart.encoding):
+        return False
     
+    encoding = chart.encoding[axis]
+
+    if encoding:
+        axis_encode = chart.to_dict()['encoding'].get(axis)
+        if axis_encode is None:
+            return False
+        else:
+          return axis_encode.get('bin')
+    else: 
+        return False
+
 def alt_get(chart,prop):
     return prop in dir(chart)
 
 def is_undefined(obj):
     return str(obj) == 'Undefined'
 
-def check_axis_meaningful(chart,axis):
-    is_meaningful = is_axis_aggregate(chart,axis)
+'''
+Recurses through concat or layer units of a visualization spec, calling function
+on each unit spec. If the function returns a truthy value 
+'''
+# one to recruse through in finding first value
+# on to recurse threough to do something to each chart
+def recurse_through_units(chart,function,exitOnFirst = False):
+    attributes_for_recursion = ['layer','hconcat','vconcat']
+    for attribute in attributes_for_recursion:
+        if alt_get(chart,attribute):
+          # if it has that combination, then recurse through it
+          results = []
+          for unit in chart.to_dict()[attribute]:
+              result = recurse_through_units(chart,function,exitOnFirst)
+              results.append(result)
+              
+              result = function(unit)
+              if exitOnFirst and result:
+                return result
+def check_axis_binned(chart,axis):
+    is_meaningful = is_axis_binned(chart,axis)
     
     # if a layered chart, 
     if alt_get(chart,'layer'):
         for layer in chart.layer:
-            if is_axis_aggregate(layer,axis):
+            if is_axis_binned(layer,axis):
+                return True
+    return is_meaningful
+
+
+def check_axis_meaningful(chart,axis):
+    is_meaningful = is_axis_aggregate(chart,axis)
+    
+    attributes_for_recursion = ['layer','hconcat','vconcat']
+    for attribute in attributes_for_recursion:
+        if alt_get(chart,attribute):
+          # TODO, make this recursive instead of one layer deep
+          for unit_spec in chart[attribute]:
+            if is_axis_aggregate(unit_spec,axis):
                 return True
     return is_meaningful
 
@@ -51,7 +110,8 @@ def extent_from_column(data,column):
         return [np.min(data[column]),np.max(data[column])]
         
 def get_field_from_unit_encoding(chart,encoding):
-    print('getting field',encoding)
+    if getattr(chart,'encoding',None) == None or is_undefined(chart.encoding):
+      return None
     # check if field is there
     if not is_undefined(getattr(chart.encoding[encoding],'field','Undefined')) :
         return chart.encoding[encoding].field
@@ -60,14 +120,13 @@ def get_field_from_unit_encoding(chart,encoding):
     return None
 
 def get_field_from_encoding(chart,axis):
-    print('in gett field',axis)
-    if alt_get(chart,'layer'):
-        print('in layer')
-        for layer in chart.layer:
-
-            if get_field_from_unit_encoding(layer,axis):
-                
-                return get_field_from_unit_encoding(layer,axis)
+    attributes_for_recursion = ['layer','hconcat','vconcat']
+    for attribute in attributes_for_recursion:
+        if alt_get(chart,attribute):
+          # TODO, make this recursive instead of one layer deep
+          for unit_spec in chart[attribute]:
+              if get_field_from_unit_encoding(unit_spec,axis):
+                  return get_field_from_unit_encoding(unit_spec,axis)
     
     return get_field_from_unit_encoding(chart,axis)
 

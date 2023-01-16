@@ -2,6 +2,8 @@ import altair as alt
 import pandas as pd
 import numpy as np
 
+from .interactions import Interaction, apply_effect, process_effects
+
 def create_hist_dataframe(data=None, *, x=None, y=None):
   # create data if x and y are pandas series
   if data is None:
@@ -18,69 +20,31 @@ def create_hist_dataframe(data=None, *, x=None, y=None):
   
   return data,x,y
 
-def hist(data=None,x=None,y=None, width=200,height=50,filters=None,color=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis(),interactive=False):
-  if filters is None:
-    filters = []
-    
+def hist(data=None,x=None,y=None, width=200,height=50,effects=None,color=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis()):
   # ensures that data is the data and x and y are column names
   data,x,y = create_hist_dataframe(data=data,x=x,y=y) 
   chart = None
 
-  layers = {"fg":None,"bg":None}
-
+  chart = alt.Chart(data)
   if x is not None and y is None:
-    layers['fg']= alt.Chart(data).mark_bar(color=fill).encode(
+    chart = chart.mark_bar(color=fill).encode(
             alt.X(f'{x}:Q', bin=True, axis=xAxis),alt.Y('count()',axis=yAxis)
               ) 
-    layers['bg'] = alt.Chart(data).mark_bar(color='lightgray').encode(
-        alt.X(f'{x}:Q', bin=True, axis=xAxis),alt.Y('count()',axis=yAxis)
-      )
-    
-    if interactive:
-
-      brush = alt.selection_interval(encodings=['x'],resolve="union",name='brush')
-      
-      if type(interactive) == type(alt.selection_interval()):
-        brush = interactive     
-      
-      layers['fg'] =  layers['fg'].add_selection(brush)
-      filters.append(brush)
-
-
   elif x is  None and y is not None:
-    layers['fg']= alt.Chart(data).mark_bar(color=fill).encode(
+    chart = chart.mark_bar(color=fill).encode(
             alt.Y(f'{y}:Q', bin=True, axis=yAxis),alt.X('count()',axis=xAxis)
               ) 
-    layers['bg'] = alt.Chart(data).mark_bar(color='lightgray').encode(
-        alt.Y(f'{y}:Q', bin=True, axis=yAxis),alt.X('count()',axis=xAxis)
-      )
-    
-    if interactive:
 
-      brush = alt.selection_interval(encodings=['y'],resolve="union",name='brush')
-      
-      if type(interactive) == type(alt.selection_interval()):
-        brush = interactive     
+  if effects:
+    chart = process_effects(chart,effects)
 
-      
-      layers['fg'] =  layers['fg'].add_selection(brush)
-      filters.append(brush)
-  
-
-  if filters:
-     for filter in filters:
-        layers['fg'] = layers['fg'].transform_filter(filter)
-
-  chart = layers['bg'] + layers['fg'] 
-  
   return chart.properties(
           width=width,
           height=height
       )
 
 
-
-def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True),interactive=False,filters=None):
+def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True),interactive=False,filters=None):
   if filters is None:
     filters = []
 
@@ -88,21 +52,19 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
   if groupby:
     facet_vars=np.unique(data[groupby])
 
-  brush = alt.selection_interval(
-    name='brush',
-    encodings=['y'],
-    empty="all"
-  )
 
   charts =[]
 
   for index,variable in enumerate(facet_vars):
     # filter to unique value
-    base = alt.Chart(data=data)
+    print('len',len(data))
+    chart = alt.Chart(data=data)
+
+    print('past chart')
 
     # filter to only one variable
     if variable is not None:
-      base=base.transform_filter(
+      chart=chart.transform_filter(
           alt.FieldEqualPredicate(field=groupby, equal=variable)
       )
 
@@ -113,27 +75,17 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
       if index != 0:
         yAxis = None
           
-    
-    
-    
 
-    layers = {'fg':None,'bg':None}
-    # for each value in origin, 
-      # create layered plot
-    # concat plots together
 
-    layers['bg'] = base.mark_area(color="lightgray",
-                                  ).transform_density(
+    chart = chart.mark_area().transform_density(
         y,
         as_=[y, 'density'],
-        extent=[5, 55],
     ).transform_stack(
         stack= "density",
         groupby= [y],
       as_= ["x", "x2"],
       offset= "center"
     ).encode(
-                    
         y=alt.Y(f'{y}:Q',axis=yAxis),
         x=alt.X(
             field='x',
@@ -147,53 +99,15 @@ def violin_plots(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels
     )
 
 
-    layers['fg'] = base
-    if interactive:
-      if type(interactive) == type(alt.selection_interval()):
-        brush = interactive     
-      layers['bg'] =  layers['bg'].add_selection(brush)
-      filters.append(brush)
   
-
     if filters:
       for filter in filters:
-        layers['fg'] = layers['fg'].transform_filter(filter)
+        chart = chart.transform_filter(filter)
     
-    
-    layers['fg'] =layers['fg'].transform_density(
-        y,
-        as_=[y, 'density'],
-        extent=[5, 55],
-    ).transform_stack(
-        stack= "density",
-        groupby= [y],
-      as_= ["x", "x2"],
-      offset= "center"
-    )
-
-    layers['fg'] = layers['fg'].mark_area(orient='horizontal', align="center",
-                                  ).encode(
-        y=alt.Y(f'{y}:Q',axis=yAxis),
-        x=alt.X(
-            field='x',
-            impute=None,
-            title=None,
-            type ="quantitative",
-                        axis=xAxis,
-
-        ),
-        x2=alt.X2(field = "x2")
-    )
-                  
-    chrt = layers['bg'] + layers['fg']
-    charts.append(chrt.properties(width=100,title = alt.TitleParams(text = variable )))
-
-  final_chart = None
-  for chart in charts:
-    if final_chart is None:
-      final_chart = chart
-    else:
-      final_chart = alt.hconcat(final_chart,chart,spacing=0)
+    charts.append(chart.properties(width=100,title = alt.TitleParams(text = variable )))
+  print('past charts')
+  final_chart = alt.hconcat(charts=charts,spacing=0)
+  
   return final_chart
 
 
