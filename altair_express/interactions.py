@@ -10,27 +10,34 @@ Interactions have effects and triggers.
 '''
 
 
+def add_cursor_to_mark(unit_chart,cursor_type):
+    if isinstance(unit_chart.mark,str):
+        mark_type = unit_chart.mark
+        unit_chart.mark = alt.MarkDef(type=mark_type,cursor=cursor_type)
+    else: 
+        unit_chart.mark.cursor = cursor_type
+    return unit_chart
 
-def add_cursor_to_mark(chart,cursor_type):
+def recursively_add_to_mark(chart,cursor_type):
+    if hasattr(chart,'mark'):
+        chart = add_cursor_to_mark(chart,cursor_type)
+        return chart
+
     attributes_for_recursion = ['layer','hconcat','vconcat']
     for attribute in attributes_for_recursion:
-        
         # TODO: fix this following line. Right now, it enters into if for any layer, concat.
         # instead, it should see if any exists, and if it does, it should use that as the item to search
         if alt_get(chart,attribute):
           for unit_spec in chart[attribute]:
-            if isinstance(unit_spec.mark,str):
-                mark_type = unit_spec.mark
-                unit_spec.mark = alt.MarkDef(type=mark_type,cursor=cursor_type)
-            else: 
-                unit_spec.mark.cursor = cursor_type
-        else:          
-            if isinstance(chart.mark,str):
-                mark_type = chart.mark  
-                chart.mark = alt.MarkDef(type=mark_type,cursor=cursor_type)
-            else: 
-              chart.mark.cursor = cursor_type
+              unit_spec = recursively_add_to_mark(unit_spec,cursor_type)
+ 
     return chart
+    
+def check_if_line(chart):
+    if isinstance(chart.mark,str):
+        return chart.mark == 'line'
+    else: 
+        return chart.mark.type == 'line'
     
 
 def create_selection(chart,interaction):
@@ -39,31 +46,41 @@ def create_selection(chart,interaction):
     # check if any axis is aggregate
     
     if interaction.action['trigger'] == "drag":
-        encodings = ['x','y'] # by default
+        encodings =  ['x','y'] # by default
         encodings = [encoding for encoding in encodings if check_axis_meaningful(chart,encoding)]
-        # TODO: fix bug if this is a calculated field
-        
-        selection = alt.selection_interval(encodings=encodings, name='drag')
 
+        # if it is a line chart without additional encodings options, use x
+        has_options = getattr(interaction,'options',None) != None
+        print('has options',has_options)
+        print('else',has_options and 'encodings' not in interaction.options)
+        if check_if_line(chart) and (not has_options or (has_options and 'encodings' not in interaction.options)):
+            encodings = ['x']
+
+        if has_options and 'encodings' in interaction.options:
+            encodings = interaction.options['encodings']
+
+
+        selection = alt.selection_interval(encodings=encodings, name='drag')
+        print(selection)
     if interaction.action['trigger'] == "click":
         selection = alt.selection_point(name='click')
         
         if 'target' in interaction.action:
             field = get_field_from_encoding(chart,interaction.action['target'])
-            selection=alt.selection_point(name='click', fields=[field])
+            selection=alt.selection_point(name='click', fields=[field],**interaction.options)
         else: 
             x_is_meaningful = check_axis_meaningful(chart,'x')
             y_is_meaningful = check_axis_meaningful(chart,'y')
             if not x_is_meaningful and y_is_meaningful:
                 # if x is aggregated (ie is a count), then add y field to selection 
-                selection=alt.selection_point(name='click', encodings=['y'])
+                selection=alt.selection_point(name='click', encodings=['y'],**interaction.options)
             elif  x_is_meaningful and not y_is_meaningful:
                 # if both of them are 
-                selection=alt.selection_point(name='click', encodings=['x'])
+                selection=alt.selection_point(name='click', encodings=['x'],**interaction.options)
             elif not x_is_meaningful and not y_is_meaningful:
-                selection=alt.selection_point(name='click', encodings=['x','y'])
+                selection=alt.selection_point(name='click', encodings=['x','y'],**interaction.options)
         
-        
+    
     return selection 
 
 def apply_effect(previous_chart,interaction,selection):
@@ -117,9 +134,31 @@ def highlight_chart(chart,interaction,selection):
     # if any of the axes are aggregated
     x_binned = check_axis_binned(chart,'x')
     y_binned = check_axis_binned(chart,'y')
-    # if either encoding is meaningful and the underlying field is binned
-    if not x_binned and not y_binned:
-        #highlight =
+    is_line = check_if_line(chart)
+
+    if  is_line:
+        # for line charts, create a new layer with a color scale that maps to light gray
+        color = get_field_from_encoding(chart,'color')        
+        
+        chart = chart + chart 
+
+        unique = np.unique(chart.data[color])
+        chart.layer[0]=chart.layer[0].encode(alt.Color(legend=None,field=color,scale=alt.Scale(domain=unique,range=['lightgray' for value in unique])))
+        chart.layer[1]=chart.layer[1].encode(alt.Color(field=color,scale=alt.Scale()))
+        
+        chart=chart.resolve_scale(
+            color='independent'
+        )
+
+        filter_transform = alt.FilterTransform({"param": selection.name})
+        if type(chart.layer[1].transform) is not alt.utils.schemapi.UndefinedType:
+            chart.layer[1].transform.insert(0,filter_transform)
+        else:
+            chart.layer[1].transform = [filter_transform]
+
+    elif not x_binned and not y_binned :
+            # if either encoding is meaningful and the underlying field is binned
+
         
         # if the chart already has a color encoding, use that as a conditional
         highlight = get_field_from_encoding(chart,'color')  or  alt.value('steelblue')
@@ -133,6 +172,7 @@ def highlight_chart(chart,interaction,selection):
     else:
       # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
+
         chart.encoding.color = alt.value('lightgray')
         chart = chart + chart 
         chart.layer[1].encoding.color = color_encoding
@@ -147,9 +187,11 @@ def highlight_chart(chart,interaction,selection):
 
 
 class Interaction:
-    def __init__(self, effect, action):
+    def __init__(self, effect, action,options):
         self.effect = effect
         self.action = action
+        self.options = options
+
 
     def __add__(self, other):
         #chart 
@@ -169,8 +211,9 @@ brush = {"trigger":"drag"}
 point = {"trigger":"click"}
 color = {"trigger":"click","target":"color"}
 
-def highlight_brush():
-    return Interaction(effect=highlight,action=brush)
+def highlight_brush(options=None):
+    return Interaction(effect=highlight,action=brush,options=options)
+
 def highlight_point():
     return Interaction(effect=highlight,action=point)
 def highlight_color():
@@ -220,9 +263,9 @@ def process_filters(chart,filters):
 
 def add_cursor(chart,interaction):
     if interaction.action['trigger'] == "drag":
-        chart = add_cursor_to_mark(chart,'crosshair')
+        chart = recursively_add_to_mark(chart,'crosshair')
     if interaction.action['trigger'] == "click":
-        chart = add_cursor_to_mark(chart,'pointer')
+        chart = recursively_add_to_mark(chart,'pointer')
     return chart
 
 def add_interaction(chart, interaction):
