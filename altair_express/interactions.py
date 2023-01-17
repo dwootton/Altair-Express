@@ -35,9 +35,9 @@ def recursively_add_to_mark(chart,cursor_type):
     
 def check_if_line(chart):
     if isinstance(chart.mark,str):
-        return chart.mark == 'line'
+        return chart.mark == 'line' or chart.mark == 'area'  
     else: 
-        return chart.mark.type == 'line'
+        return chart.mark.type == 'line' or chart.mark.type == 'area'
     
 
 def create_selection(chart,interaction):
@@ -51,8 +51,6 @@ def create_selection(chart,interaction):
 
         # if it is a line chart without additional encodings options, use x
         has_options = getattr(interaction,'options',None) != None
-        print('has options',has_options)
-        print('else',has_options and 'encodings' not in interaction.options)
         if check_if_line(chart) and (not has_options or (has_options and 'encodings' not in interaction.options)):
             encodings = ['x']
 
@@ -95,7 +93,7 @@ def apply_effect(previous_chart,interaction,selection):
     
     if interaction.effect['transform'] == "highlight":
         chart = highlight_chart(chart,interaction,selection)
-            
+    
     if interaction.effect['transform'] == "group":
         chart = group_chart(chart,interaction,selection)
         
@@ -138,14 +136,28 @@ def highlight_chart(chart,interaction,selection):
 
     if  is_line:
         # for line charts, create a new layer with a color scale that maps to light gray
-        color = get_field_from_encoding(chart,'color')        
-        
+        color = get_field_from_encoding(chart,'color')      
+
+        transform = None
+
+        if getattr(chart,'transform',None):
+            transform = getattr(chart,'transform',None) 
+            chart.transform = alt.Undefined
+
         chart = chart + chart 
 
-        unique = np.unique(chart.data[color])
-        chart.layer[0]=chart.layer[0].encode(alt.Color(legend=None,field=color,scale=alt.Scale(domain=unique,range=['lightgray' for value in unique])))
-        chart.layer[1]=chart.layer[1].encode(alt.Color(field=color,scale=alt.Scale()))
-        
+        if color == None:
+          
+            chart.layer[0]=chart.layer[0].encode(color=alt.value('lightgray'))
+            chart.layer[1]=chart.layer[1].encode(color=alt.value('steelblue'))
+        else: 
+            unique = np.unique(chart.data[color])
+            chart.layer[0]=chart.layer[0].encode(alt.Color(legend=None,field=color,scale=alt.Scale(domain=unique,range=['lightgray' for value in unique])))
+            chart.layer[1]=chart.layer[1].encode(alt.Color(field=color,scale=alt.Scale()))
+
+        if transform:
+          chart.transform = transform
+
         chart=chart.resolve_scale(
             color='independent'
         )
@@ -155,6 +167,8 @@ def highlight_chart(chart,interaction,selection):
             chart.layer[1].transform.insert(0,filter_transform)
         else:
             chart.layer[1].transform = [filter_transform]
+        print('passed transform')
+
 
     elif not x_binned and not y_binned :
             # if either encoding is meaningful and the underlying field is binned
@@ -187,7 +201,7 @@ def highlight_chart(chart,interaction,selection):
 
 
 class Interaction:
-    def __init__(self, effect, action,options):
+    def __init__(self, effect, action,options=None):
         self.effect = effect
         self.action = action
         self.options = options
@@ -275,7 +289,7 @@ def add_interaction(chart, interaction):
     chart=chart.add_params(parameter)
 
     chart =  apply_effect(chart,interaction,parameter)
-
     chart = add_cursor(chart,interaction)
+
     return chart
 

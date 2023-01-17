@@ -23,6 +23,7 @@ def is_axis_aggregate(chart,axis):
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:
+        print('encoding',getattr(chart,'encoding',None))
         axis_encode = chart.to_dict()['encoding'].get(axis)
         if axis_encode is None:
             return False
