@@ -3,7 +3,7 @@
 import altair as alt
 import pandas as pd
 import numpy as np
-from .utils import add_encoding,check_axis_binned, get_field_from_encoding, check_axis_meaningful, is_undefined, alt_get, extent_from_column
+from .utils import add_encoding,check_axis_binned, get_field_from_encoding, check_axis_aggregate, is_undefined, alt_get, extent_from_column
 '''
 Interactions have effects and triggers. 
 "instruments" are the location-triggers (how to create) 
@@ -33,12 +33,26 @@ def recursively_add_to_mark(chart,cursor_type):
  
     return chart
     
-def check_if_line(chart):
+def check_if_unit_line(chart):
     if isinstance(chart.mark,str):
         return chart.mark == 'line' or chart.mark == 'area'  
     else: 
         return chart.mark.type == 'line' or chart.mark.type == 'area'
-    
+
+def check_if_line(chart):
+    if hasattr(chart,'mark'):
+        return check_if_unit_line(chart)
+
+    attributes_for_recursion = ['layer','hconcat','vconcat']
+    for attribute in attributes_for_recursion:
+        # TODO: fix this following line. Right now, it enters into if for any layer, concat.
+        # instead, it should see if any exists, and if it does, it should use that as the item to search
+        if alt_get(chart,attribute):
+          for unit_spec in chart[attribute]:
+              if(check_if_unit_line(unit_spec)):
+                return True
+    return False
+
 
 def create_selection(chart,interaction):
     selection = None
@@ -47,7 +61,7 @@ def create_selection(chart,interaction):
     
     if interaction.action['trigger'] == "drag":
         encodings =  ['x','y'] # by default
-        encodings = [encoding for encoding in encodings if check_axis_meaningful(chart,encoding)]
+        encodings = [encoding for encoding in encodings if check_axis_aggregate(chart,encoding)]
 
         # if it is a line chart without additional encodings options, use x
         has_options = getattr(interaction,'options',None) != None
@@ -59,25 +73,34 @@ def create_selection(chart,interaction):
 
 
         selection = alt.selection_interval(encodings=encodings, name='drag')
-        print(selection)
     if interaction.action['trigger'] == "click":
         selection = alt.selection_point(name='click')
         
         if 'target' in interaction.action:
             field = get_field_from_encoding(chart,interaction.action['target'])
-            selection=alt.selection_point(name='click', fields=[field],**interaction.options)
+            selection=alt.selection_point(name='click', encodings=[interaction.action['target']], fields=[field])
         else: 
-            x_is_meaningful = check_axis_meaningful(chart,'x')
-            y_is_meaningful = check_axis_meaningful(chart,'y')
-            if not x_is_meaningful and y_is_meaningful:
+            x_is_aggregate = check_axis_aggregate(chart,'x')
+            y_is_aggregate = check_axis_aggregate(chart,'y')
+            if  x_is_aggregate and not y_is_aggregate:
                 # if x is aggregated (ie is a count), then add y field to selection 
-                selection=alt.selection_point(name='click', encodings=['y'],**interaction.options)
-            elif  x_is_meaningful and not y_is_meaningful:
+                selection=alt.selection_point(name='click', encodings=['y'])
+            elif not  x_is_aggregate and  y_is_aggregate:
                 # if both of them are 
-                selection=alt.selection_point(name='click', encodings=['x'],**interaction.options)
-            elif not x_is_meaningful and not y_is_meaningful:
-                selection=alt.selection_point(name='click', encodings=['x','y'],**interaction.options)
-        
+                selection=alt.selection_point(name='click', encodings=['x'])
+            elif not x_is_aggregate and not y_is_aggregate:
+                selection=alt.selection_point(name='click', encodings=['x','y'])
+
+    if interaction.action['trigger'] == "type":
+        selection = alt.param(name='query',value="",bind=alt.binding(input='text', placeholder='Type to search...'))
+
+    if interaction.action['trigger'] == "panzoom":
+        encodings =  [] # by default
+        if interaction.options['bind_x']:
+            encodings.append('x')
+        if interaction.options['bind_y']:
+            encodings.append('y')
+        selection = alt.selection_interval(bind="scales", encodings=encodings)
     
     return selection 
 
@@ -97,11 +120,119 @@ def apply_effect(previous_chart,interaction,selection):
     if interaction.effect['transform'] == "group":
         chart = group_chart(chart,interaction,selection)
         
+    if interaction.effect['transform'] == "scale_bind":
+        chart = pan_zoom_chart(chart,interaction,selection)
+
     return chart
 
 
 
 def group_chart(chart,interaction,selection):
+    # point interactions can only occur on categorical fields 
+    if interaction.action['trigger'] == "click":
+        # determine if either x or y is independent
+        # if so, group by that axis, do all groupings 
+        groupby_category = ['color','x','y'] 
+        
+        for category in groupby_category:
+            field = get_field_from_encoding(chart,category)
+
+            if not field:
+                continue
+
+            # check if field is an independent axis 
+            if_statement = f'''
+              if(isDefined({selection.name}["_grouping_column"]),
+                indexof({selection.name}["_grouping_column"],datum["{field}"]) > -1 ?
+                    "Group" : datum["{field}"],
+                datum["{field}"]
+              ) 
+            '''
+            if_statement= ' '.join(if_statement.split())
+
+
+            # must pass as a dictionary because of use of as (a reserved keyword)
+            calculate_transform = alt.CalculateTransform(**{'calculate':if_statement,'as':"_grouping_column"})
+
+            if not is_undefined(chart.transform):
+                chart.transform.insert(0,calculate_transform)
+            else:
+                chart.transform = [calculate_transform]
+
+          
+
+
+            # check if x or y is aggregate
+            x_is_aggregate = check_axis_aggregate(chart,'x')
+            y_is_aggregate = check_axis_aggregate(chart,'y')
+            if not y_is_aggregate and not x_is_aggregate:
+                y_field = get_field_from_encoding(chart,'y')
+                x_field = get_field_from_encoding(chart,'x')
+                color_field = get_field_from_encoding(chart,'color')
+
+               
+                # TODO, smartly determine if x or y are indepdent or dependent variables
+                groupby = [x_field]
+                # if color was used to create separate data points, then group by color
+                if color_field:
+                  groupby.append('_grouping_column')
+
+
+                y_avg = f'avg{y_field}'
+
+
+                chart.encoding.y.field = y_avg
+
+
+                chart = chart.transform_aggregate(aggregate=[alt.AggregatedFieldDef("average",y_field,**{'as':y_avg})],groupby=groupby)
+
+
+            y_field = get_field_from_encoding(chart,'y')
+            # TODO: calculate another datum property that can be used for tooltips
+
+            if_2 = f'''
+            if(isDefined({selection.name}["_grouping_column"]),
+              datum["_grouping_column"] == "Group"?
+                  {selection.name}["_grouping_column"] : datum["_grouping_column"],
+              datum["_grouping_column"]
+            ) + " : " + datum["{y_field}"]
+            '''
+
+            if_2= ' '.join(if_2.split())
+
+            calculate_transform2 = alt.CalculateTransform(**{'calculate':if_2,'as':"_tooltip_column"})
+            chart.transform.append(calculate_transform2)
+            chart= chart.encode(tooltip=alt.Tooltip("_tooltip_column",type='nominal'))
+
+
+            chart.encoding[category].field = "_grouping_column" 
+
+            # for line charts, add interaction to an overlay so that mouse events have larger hitbox
+            if check_if_line(chart):
+                params = chart.params
+                chart.params = []
+
+
+                interaction_overlay = chart.copy(deep=True).mark_line(strokeWidth= 8, stroke="transparent")
+                properties = chart.mark
+                if isinstance(properties,str):
+                  interaction_overlay=interaction_overlay.mark_line(strokeWidth= 8, stroke="transparent")
+                else:
+                  properties['strokeWidth'] = 8
+                  properties['stroke'] = "transparent"
+                  interaction_overlay=interaction_overlay.mark_line(**properties)
+                interaction_overlay.params = params
+                
+                chart = alt.LayerChart(layer=[chart,interaction_overlay])
+                #chart.encoding.y.field = "_grouping_column"
+                #chart.encoding.x.field = "_grouping_column"
+
+            
+            break
+    # brush interactions can occur on both categorical and quantitative fields
+    
+
+    
     return chart
     
     
@@ -109,26 +240,42 @@ def group_chart(chart,interaction,selection):
     
 def filter_chart(chart,interaction,selection):
     filter_transform = alt.FilterTransform({"param": selection.name})
+
+    # for text box interaction, use query filter
+    if interaction.action['trigger'] == "type":
+        query_string = f"(!query || test(regexp(query,'i'), toString(datum['{interaction.action['target']}'])))"
+        filter_transform = alt.FilterTransform(**{"filter": query_string})
+
+
         # insert at begining to ensure all data gets filtered correctly
     if not is_undefined(chart.transform):
         chart.transform.insert(0,filter_transform)
     else:
         chart.transform = [filter_transform]
         
-        # for each encoding in selection 
-    encodings = selection.param.select.encodings
-    if encodings: 
+    # for each encoding in selection 
+    selection_type = getattr(selection.param,'select',{})
+    encodings = getattr(selection_type,'encodings',None) or ["x","y"] # default to x and y to maintain reference of chart
+    if encodings and not is_undefined(encodings): 
         for encoding in encodings:
-            scale = chart['encoding'][encoding]['scale']
+            field = get_field_from_encoding(chart,encoding)
 
-            extent = extent_from_column(chart.data,chart['encoding'][encoding]['field'])
+            extent = extent_from_column(chart.data,field)
             # TODO: copy the existing scale, just overwrite the domain
             scale = alt.Scale(domain=extent)
             chart['encoding'][encoding]['scale'] = scale
             
     return chart
 
+def pan_zoom_chart(chart,interaction,selection):
+
+    alt.ViewBackground(cursor="move")
+    return chart.add_params(selection)
+
 def highlight_chart(chart,interaction,selection):
+     # for text box interaction, use query filter
+   
+
     # if any of the axes are aggregated
     x_binned = check_axis_binned(chart,'x')
     y_binned = check_axis_binned(chart,'y')
@@ -147,11 +294,11 @@ def highlight_chart(chart,interaction,selection):
         chart = chart + chart 
 
         if color == None:
-          
             chart.layer[0]=chart.layer[0].encode(color=alt.value('lightgray'))
             chart.layer[1]=chart.layer[1].encode(color=alt.value('steelblue'))
         else: 
-            unique = np.unique(chart.data[color])
+            # using pd.unique to ensure Nones are encorporated
+            unique = pd.unique(chart.data[color])
             chart.layer[0]=chart.layer[0].encode(alt.Color(legend=None,field=color,scale=alt.Scale(domain=unique,range=['lightgray' for value in unique])))
             chart.layer[1]=chart.layer[1].encode(alt.Color(field=color,scale=alt.Scale()))
 
@@ -167,24 +314,25 @@ def highlight_chart(chart,interaction,selection):
             chart.layer[1].transform.insert(0,filter_transform)
         else:
             chart.layer[1].transform = [filter_transform]
-        print('passed transform')
 
 
     elif not x_binned and not y_binned :
-            # if either encoding is meaningful and the underlying field is binned
-
-        
         # if the chart already has a color encoding, use that as a conditional
         highlight = get_field_from_encoding(chart,'color')  or  alt.value('steelblue')
-        #if 'encoding' in chart and not is_undefined(chart.encoding) and not is_undefined(chart.encoding.color):
-        #    highlight = get_field_from_encoding(chart,'color')  
-            
-        color = alt.condition(selection,highlight,alt.value('lightgray'))
+
+        color = None
+
+        if interaction.action['trigger'] == "type":
+             query_string = f"(!query || test(regexp(query,'i'), toString(datum['{interaction.action['target']}'])))"
+             color = alt.condition(query_string,highlight,alt.value('lightgray'))
+        else:
+             color = alt.condition(selection,highlight,alt.value('lightgray'))
+
      
         chart = add_encoding(chart,color)
         
     else:
-      # used for any elements where height, width, etc are controlled by filter 
+        # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
 
         chart.encoding.color = alt.value('lightgray')
@@ -192,6 +340,9 @@ def highlight_chart(chart,interaction,selection):
         chart.layer[1].encoding.color = color_encoding
 
         filter_transform = alt.FilterTransform({"param": selection.name})
+
+       
+
         if type(chart.layer[1].transform) is not alt.utils.schemapi.UndefinedType:
             chart.layer[1].transform.insert(0,filter_transform)
         else:
@@ -215,15 +366,20 @@ class Interaction:
 
     def set_selection(self,selection):
         self.selection = selection
+
     def get_selection(self):
-        return self.selection
+        return getattr(self,'selection',None)
 
 highlight = {"transform":"highlight"}
 _filter = {"transform":"filter"} # _filter as to avoid overloading python's filter function
+group = {"transform":"group"}
+scale_bind = {"transform":"scale_bind"}
 
 brush = {"trigger":"drag"}
 point = {"trigger":"click"}
 color = {"trigger":"click","target":"color"}
+text = {"trigger":"type"}
+brush = {"trigger":"drag"}
 
 def highlight_brush(options=None):
     return Interaction(effect=highlight,action=brush,options=options)
@@ -237,7 +393,23 @@ def filter_brush():
 def filter_point():
     return Interaction(effect=_filter,action=point)
 
+def group_brush():
+    return Interaction(effect=group,action=brush)
+def group_point():
+    return Interaction(effect=group,action=point)
+def group_color():
+    return Interaction(effect=group,action=color)
 
+def pan_zoom(bind_x=True, bind_y=True):    
+    return Interaction(effect=scale_bind,action={"trigger":"panzoom"},options={'bind_x':bind_x,'bind_y':bind_y})
+
+def filter_type(target):
+    action = { "trigger": "type", "target": target}
+    return Interaction(effect=_filter,action=action)
+
+def highlight_type(target):
+    action = { "trigger": "type", "target": target}
+    return Interaction(effect=highlight,action=action)
 # group_brush
 # group_point
 
@@ -250,6 +422,8 @@ def process_effects(chart,effects):
       chart = process_filters(chart,effects['filter'])
     elif 'highlight' in effects:
       chart = process_highlights(chart,effects['highlight'])
+    elif 'group' in effects:
+      chart = process_groups(chart,effects['group'])
     return chart
 
 def process_highlights(chart,highlights):
@@ -259,6 +433,9 @@ def process_highlights(chart,highlights):
   for highlight in highlights:
       if isinstance(highlight, Interaction):
           parameter = highlight.get_selection()
+          if parameter is None:
+              parameter = create_selection(chart,highlight)
+
           chart = apply_effect(chart,highlight,parameter)
   return chart
 
@@ -275,11 +452,28 @@ def process_filters(chart,filters):
           chart = chart.transform_filter(filter)
   return chart
 
+def process_groups(chart,groups):
+  if not isinstance(groups, list):
+      groups = [groups]
+
+  for group in groups:
+      # if filter is Interaction instance 
+      if isinstance(group, Interaction):
+          parameter = group.get_selection()
+          if parameter is None:
+              parameter = create_selection(chart,group)
+          chart = apply_effect(chart,group,parameter)
+      
+  return chart
 def add_cursor(chart,interaction):
     if interaction.action['trigger'] == "drag":
         chart = recursively_add_to_mark(chart,'crosshair')
+        chart.view ={"cursor":"crosshair","stroke":None}
     if interaction.action['trigger'] == "click":
         chart = recursively_add_to_mark(chart,'pointer')
+    if interaction.action['trigger'] == "panzoom":
+        chart = recursively_add_to_mark(chart,'move')
+        chart.view ={"cursor":"move"}
     return chart
 
 def add_interaction(chart, interaction):

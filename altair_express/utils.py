@@ -23,7 +23,6 @@ def is_axis_aggregate(chart,axis):
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:
-        print('encoding',getattr(chart,'encoding',None))
         axis_encode = chart.to_dict()['encoding'].get(axis)
         if axis_encode is None:
             return False
@@ -31,8 +30,8 @@ def is_axis_aggregate(chart,axis):
         encode_string = f'{axis_encode}'
         for aggregation_name in AGGREGATION_NAMES:
             if encode_string.find(aggregation_name) > -1:
-                return False
-        return True
+                return True
+        return False
     else: 
         return False
 
@@ -87,7 +86,7 @@ def check_axis_binned(chart,axis):
     return is_meaningful
 
 
-def check_axis_meaningful(chart,axis):
+def check_axis_aggregate(chart,axis):
     is_meaningful = is_axis_aggregate(chart,axis)
     
     attributes_for_recursion = ['layer','hconcat','vconcat']
@@ -117,18 +116,24 @@ def get_field_from_unit_encoding(chart,encoding):
     if not is_undefined(getattr(chart.encoding[encoding],'field','Undefined')) :
         return chart.encoding[encoding].field
     elif not is_undefined(getattr(chart.encoding[encoding],'shorthand','Undefined')):
-        return chart.encoding[encoding].shorthand[:-2]
+        shorthand = chart.encoding[encoding].shorthand
+        CODES = [':Q',':O',':N',':T',':G']
+        for code in CODES:
+          shorthand = shorthand.replace(code,'')
+        return shorthand
     return None
 
 def get_field_from_encoding(chart,axis):
     attributes_for_recursion = ['layer','hconcat','vconcat']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
+          print('inget',attribute)
           # TODO, make this recursive instead of one layer deep
           for unit_spec in chart[attribute]:
               if get_field_from_unit_encoding(unit_spec,axis):
                   return get_field_from_unit_encoding(unit_spec,axis)
-    
+    print('from field',axis)
+
     return get_field_from_unit_encoding(chart,axis)
 
 def data_type_converter(data_type):

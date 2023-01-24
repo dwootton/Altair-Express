@@ -57,10 +57,7 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
 
   for index,variable in enumerate(facet_vars):
     # filter to unique value
-    print('len',len(data))
     chart = alt.Chart(data=data)
-
-    print('past chart')
 
     # filter to only one variable
     if variable is not None:
@@ -75,8 +72,6 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
       if index != 0:
         yAxis = None
           
-
-
     chart = chart.mark_area().transform_density(
         y,
         as_=[y, 'density'],
@@ -105,7 +100,6 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
         chart = chart.transform_filter(filter)
     
     charts.append(chart.properties(width=100,title = alt.TitleParams(text = variable )))
-  print('past charts')
   final_chart = alt.hconcat(charts=charts,spacing=0)
   
   return final_chart
@@ -125,7 +119,7 @@ def countplot(data=None,x=None,y=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interac
 
   # if x 
   chart = alt.Chart(data).mark_bar().encode(
-      alt.X(f'{x}:N',axis=xAxis), # remove the sort as that will keep it consistent with the background
+      alt.X(f'{x}:N',axis=xAxis,sort='-y'), # remove the sort as that will keep it consistent with the background
       alt.Y(f'count({x}):Q',axis=yAxis)
   )
    
