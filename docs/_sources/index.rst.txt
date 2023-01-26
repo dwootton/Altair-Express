@@ -4,6 +4,7 @@ Meaningful Interaction for Analysis: Altair Express
 <Insert Gallery Here> 
 `Inspiration from Rive Gallery <https://rive.app/community/>`_
 
+
 Altair express is a high-level data visualization library to make
 interactive data analysis easier. In Altair Express 
 (referred to as **alx**) creating an interactive chart can be done
@@ -15,3 +16,8 @@ by.
 This library is meant to serve as a prototype for further
 development and to better study how easy interaction
 specification affects analysis patterns.
+
+.. toctree::
+ :maxdepth: 2
+
+    api/interactiontypology.rst

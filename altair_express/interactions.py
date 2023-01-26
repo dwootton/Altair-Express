@@ -61,7 +61,7 @@ def create_selection(chart,interaction):
     
     if interaction.action['trigger'] == "drag":
         encodings =  ['x','y'] # by default
-        encodings = [encoding for encoding in encodings if check_axis_aggregate(chart,encoding)]
+        encodings = [encoding for encoding in encodings if not check_axis_aggregate(chart,encoding)]
 
         # if it is a line chart without additional encodings options, use x
         has_options = getattr(interaction,'options',None) != None

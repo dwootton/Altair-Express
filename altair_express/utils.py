@@ -127,12 +127,10 @@ def get_field_from_encoding(chart,axis):
     attributes_for_recursion = ['layer','hconcat','vconcat']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
-          print('inget',attribute)
           # TODO, make this recursive instead of one layer deep
           for unit_spec in chart[attribute]:
               if get_field_from_unit_encoding(unit_spec,axis):
                   return get_field_from_unit_encoding(unit_spec,axis)
-    print('from field',axis)
 
     return get_field_from_unit_encoding(chart,axis)
 
