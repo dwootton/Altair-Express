@@ -268,8 +268,6 @@ def filter_chart(chart,interaction,selection):
     return chart
 
 def pan_zoom_chart(chart,interaction,selection):
-
-    alt.ViewBackground(cursor="move")
     return chart.add_params(selection)
 
 def highlight_chart(chart,interaction,selection):
@@ -370,16 +368,23 @@ class Interaction:
     def get_selection(self):
         return getattr(self,'selection',None)
 
+# Input Effects
 highlight = {"transform":"highlight"}
 _filter = {"transform":"filter"} # _filter as to avoid overloading python's filter function
 group = {"transform":"group"}
 scale_bind = {"transform":"scale_bind"}
+tooltip = {"transform":"tooltip"}
 
+# Input Actions
 brush = {"trigger":"drag"}
 point = {"trigger":"click"}
 color = {"trigger":"click","target":"color"}
 text = {"trigger":"type"}
 brush = {"trigger":"drag"}
+hover = {"trigger":"mouseover"}
+
+def tooltip_hover():
+    return Interaction(effect=tooltip,action=hover)
 
 def highlight_brush(options=None):
     return Interaction(effect=highlight,action=brush,options=options)
