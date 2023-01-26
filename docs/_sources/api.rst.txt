@@ -1,0 +1,24 @@
+.. include:: ../API.rst
+
+
+.. altair-plot::
+    :output: repr
+
+    from vega_datasets import data
+
+    df = data.seattle_weather()
+    df.head()
+
+
+
+
+and 
+
+
+.. altair-plot::
+
+    import altair as alt
+
+    alt.Chart(df).mark_tick().encode(
+        x='precipitation',
+    )
