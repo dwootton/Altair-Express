@@ -20,7 +20,7 @@ Interaction Typology
 +-----------------------+------------------------+-----------------+--------------+
 | highlight_type        | alx.highlight_type()   | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| group_point           | alx.group_point()      | groupby         | implemented  |
+| :ref:`group-point`    | alx.group_point()      | groupby         | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | panzoom               | alx.panzoom()          | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+

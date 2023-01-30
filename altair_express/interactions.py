@@ -9,7 +9,8 @@ Interactions have effects and triggers.
 "instruments" are the location-triggers (how to create) 
 '''
 
-
+DEFAULT_COLORS = ["#5778a4", "#e49444", "#d1615d","#85b6b2","#6a9f58","#e7ca60","#a87c9f","#f1a2a9","#967662","#b8b0ac"]
+                  
 def add_cursor_to_mark(unit_chart,cursor_type):
     if isinstance(unit_chart.mark,str):
         mark_type = unit_chart.mark
@@ -32,7 +33,9 @@ def recursively_add_to_mark(chart,cursor_type):
               unit_spec = recursively_add_to_mark(unit_spec,cursor_type)
  
     return chart
-    
+
+ALX_SELECTION_PREFIX = "ALX_SELECTION_"
+
 def check_if_unit_line(chart):
     if isinstance(chart.mark,str):
         return chart.mark == 'line' or chart.mark == 'area'  
@@ -72,27 +75,27 @@ def create_selection(chart,interaction):
             encodings = interaction.options['encodings']
 
 
-        selection = alt.selection_interval(encodings=encodings, name='drag')
+        selection = alt.selection_interval(encodings=encodings, name=ALX_SELECTION_PREFIX+'drag')
     if interaction.action['trigger'] == "click":
-        selection = alt.selection_point(name='click')
+        selection = alt.selection_point(name=ALX_SELECTION_PREFIX+'click')
         
         if 'target' in interaction.action:
             field = get_field_from_encoding(chart,interaction.action['target'])
-            selection=alt.selection_point(name='click', encodings=[interaction.action['target']], fields=[field])
+            selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=[interaction.action['target']], fields=[field])
         else: 
             x_is_aggregate = check_axis_aggregate(chart,'x')
             y_is_aggregate = check_axis_aggregate(chart,'y')
             if  x_is_aggregate and not y_is_aggregate:
                 # if x is aggregated (ie is a count), then add y field to selection 
-                selection=alt.selection_point(name='click', encodings=['y'])
+                selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=['y'])
             elif not  x_is_aggregate and  y_is_aggregate:
                 # if both of them are 
-                selection=alt.selection_point(name='click', encodings=['x'])
+                selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=['x'])
             elif not x_is_aggregate and not y_is_aggregate:
-                selection=alt.selection_point(name='click', encodings=['x','y'])
+                selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=['x','y'])
 
     if interaction.action['trigger'] == "type":
-        selection = alt.param(name='query',value="",bind=alt.binding(input='text', placeholder='Type to search...'))
+        selection = alt.param(name=ALX_SELECTION_PREFIX+'query',value="",bind=alt.binding(input='text', placeholder='Type to search...'))
 
     if interaction.action['trigger'] == "panzoom":
         encodings =  [] # by default
@@ -100,9 +103,24 @@ def create_selection(chart,interaction):
             encodings.append('x')
         if interaction.options['bind_y']:
             encodings.append('y')
-        selection = alt.selection_interval(bind="scales", encodings=encodings)
+        selection = alt.selection_interval(name=ALX_SELECTION_PREFIX+'panzoom',bind="scales", encodings=encodings)
     
     return selection 
+
+def add_colors(chart,data,field):
+    unique_values = pd.unique(data)
+    unique_values.sort()
+    domain = ['Group']
+    range = ['black']
+    for index,value in enumerate(unique_values):
+        domain.append(value)
+        if index < len(DEFAULT_COLORS):
+            range.append(DEFAULT_COLORS[index])
+        else: 
+            range.append("lightgray")
+    color_scale = alt.Scale(domain=domain,range=range)
+    chart=chart.encode(alt.Color(field=field,scale=color_scale))
+    return chart
 
 def apply_effect(previous_chart,interaction,selection):
     chart = previous_chart.copy(deep=True)
@@ -209,10 +227,29 @@ def group_chart(chart,interaction,selection):
 
             # for line charts, add interaction to an overlay so that mouse events have larger hitbox
             if check_if_line(chart):
+                # do 
+                if category == 'color':
+                    chart = add_colors(chart,chart.data[field],"_grouping_column")
+
+                
+                
+                if category == 'color':
+                    # apply colors to layers
+                    unique_values = pd.unique(chart.data[field])
+                    unique_values.sort()
+                    domain = ['Group']
+                    range = ['black']
+                    for index,value in enumerate(unique_values):
+                        domain.append(value)
+                        if index < len(DEFAULT_COLORS):
+                           range.append(DEFAULT_COLORS[index])
+                        else: 
+                            range.append("lightgray")
+                    color_scale = alt.Scale(domain=domain,range=range)
+                    chart=chart.encode(alt.Color(field="_grouping_column",scale=color_scale))
+                # add mouse overlay
                 params = chart.params
                 chart.params = []
-
-
                 interaction_overlay = chart.copy(deep=True).mark_line(strokeWidth= 8, stroke="transparent")
                 properties = chart.mark
                 if isinstance(properties,str):
@@ -298,7 +335,7 @@ def highlight_chart(chart,interaction,selection):
             # using pd.unique to ensure Nones are encorporated
             unique = pd.unique(chart.data[color])
             chart.layer[0]=chart.layer[0].encode(alt.Color(legend=None,field=color,scale=alt.Scale(domain=unique,range=['lightgray' for value in unique])))
-            chart.layer[1]=chart.layer[1].encode(alt.Color(field=color,scale=alt.Scale()))
+            chart.layer[1]= add_colors(chart.layer[1],chart.data[color],color)
 
         if transform:
           chart.transform = transform
