@@ -17,8 +17,7 @@ and
 
 .. altair-plot::
 
-    import sys
-sys.path.insert(0, '/Users/dylanwootton/Documents/GitHub/altair/altair')
+    
 import altair as alt
 
     alt.Chart(df).mark_tick().encode(

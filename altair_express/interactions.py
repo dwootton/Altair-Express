@@ -1,7 +1,6 @@
 """Interactions module."""
 
-import sys
-sys.path.insert(0, '/Users/dylanwootton/Documents/GitHub/altair/altair')
+
 import altair as alt
 import pandas as pd
 import numpy as np
