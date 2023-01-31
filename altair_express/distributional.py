@@ -105,7 +105,7 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
   return final_chart
 
 
-def countplot(data=None,x=None,y=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=False, filters=None,width=250,height=150, max_bars = None):
+def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=False, filters=None,width=250,height=150, max_bars = None):
   if filters is None:
     filters = []
 
@@ -132,3 +132,23 @@ def countplot(data=None,x=None,y=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interac
           width=width,
           height=height
       )
+
+
+def heatmap(data=None):
+  if data is None:
+    raise ValueError('[heatmap] no data or data series provided.')
+  
+  
+  source = pd.DataFrame(data.unstack().reset_index().rename(columns={0:"value"}))
+
+
+  x_variable = source.columns[0]
+  y_variable = source.columns[1]
+
+  
+  chart = alt.Chart(source).mark_rect().encode(
+    x=f'{x_variable}:O',
+    y=f'{y_variable}:O',
+    color='value:Q'
+  )
+  return chart

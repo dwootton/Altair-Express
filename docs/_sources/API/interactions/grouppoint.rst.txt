@@ -17,5 +17,5 @@ Group point is often used to create data-driven groupings for further analysis.
 This can be useful for comparing different cohorts across other charts and often is
 combined with another visualization showing aggregates for different groups. 
 
-
+To allow for further actions to be taken on these groups, 
 

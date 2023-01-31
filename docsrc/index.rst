@@ -18,6 +18,8 @@ development and to better study how easy interaction
 specification affects analysis patterns.
 
 .. toctree::
- :maxdepth: 2
+    :maxdepth: 2
 
-    api/interactiontypology.rst
+    Interactions <api/interactiontypology>
+    Visualizations <api/visualizationtypology>
+

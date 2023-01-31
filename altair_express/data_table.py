@@ -32,7 +32,7 @@ def data_table(data=None,vars=None,row_limit=25):
     chart_index = index + 1 # for spacer
     if(is_numeric_dtype(data[variable])):
 
-      charts.append(hist(data = data,x = variable,width=chart_width,interactive=brush,xAxis=None,yAxis=None,filters=[picker]))
+      charts.append(hist(data = data,x = variable,width=chart_width,xAxis=None,yAxis=None))
 
       brush_name = brush.name
       signal_index = f'{brush_name}.{variable}'
@@ -52,7 +52,7 @@ def data_table(data=None,vars=None,row_limit=25):
       charts[chart_index] = alt.vconcat(charts[chart_index],bounds, spacing=0)
     else:
       # append blank till count plot are ready
-      spacer = countplot(data=data,x=variable,interactive=picker,width=column_width,height=50,filters=[brush],xAxis=None,yAxis=None)
+      spacer = countplot(data=data,x=variable,width=column_width,height=50,xAxis=None,yAxis=None)
       signal_index = False
       bounds = alt.hconcat(alt.Chart(data=pd.DataFrame({'min':['_']}))
             .mark_text()

@@ -3,6 +3,7 @@ import altair as alt
 from altair_express.interactions import process_effects
 from ..utils import data_type_converter, create_dataframe
 import numpy as np
+from ..distributional import heatmap
 
 def relplot(data=None, *, x=None, y=None,color=None,interactive=None,kind="scatter",width=200,height=200):
 
@@ -105,3 +106,11 @@ def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=None,yAxis=a
 
 
   return chart.properties(width=width,height=height)
+
+
+def corr_map(data=None, vars=None):
+  if vars is None:
+    vars = data.columns
+
+  correlation = data.corr()
+  return heatmap(correlation)

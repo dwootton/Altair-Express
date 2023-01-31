@@ -1,16 +1,11 @@
 import numpy as np
 import pandas as pd
 import altair as alt
+
 def add_encoding(chart,color):
-    if getattr(chart,'encode',None):
+    if getattr(chart,'encode',None) and getattr(chart,'mark',None) is not None:
         chart= chart.encode(color=color)
-    else:
-      attributes_for_recursion = ['hconcat','vconcat']
-      for attribute in attributes_for_recursion:
-          if alt_get(chart,attribute):
-            # TODO, make this recursive instead of one layer deep
-            for unit_chart in chart[attribute]:
-              unit_chart  = unit_chart.encode(color=color)
+    
     return chart
 
     #chart = add_encoding(chart,{'color':color})
@@ -87,16 +82,17 @@ def check_axis_binned(chart,axis):
 
 
 def check_axis_aggregate(chart,axis):
-    is_meaningful = is_axis_aggregate(chart,axis)
+    is_aggregate = is_axis_aggregate(chart,axis)
     
     attributes_for_recursion = ['layer','hconcat','vconcat']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
           # TODO, make this recursive instead of one layer deep
           for unit_spec in chart[attribute]:
-            if is_axis_aggregate(unit_spec,axis):
-                return True
-    return is_meaningful
+            if not is_axis_aggregate(unit_spec,axis):
+                return False
+           
+    return is_aggregate
 
 def extent_from_column(data,column):
     if alt.utils.infer_vegalite_type(data[column]) == 'ordinal' or alt.utils.infer_vegalite_type(data[column]) == 'nominal':

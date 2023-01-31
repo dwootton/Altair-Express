@@ -17,11 +17,21 @@ def add_cursor_to_mark(unit_chart,cursor_type):
         unit_chart.mark = alt.MarkDef(type=mark_type,cursor=cursor_type)
     else: 
         unit_chart.mark.cursor = cursor_type
+    
+    
     return unit_chart
 
 def recursively_add_to_mark(chart,cursor_type):
-    if hasattr(chart,'mark'):
+    if hasattr(chart,'mark') :
         chart = add_cursor_to_mark(chart,cursor_type)
+
+# todo fix this, to not add click pointer to background 
+    
+    if (hasattr(chart,'mark') and cursor_type != "pointer") or hasattr(chart,'layer') :
+        chart.view = {
+            "cursor":cursor_type,
+            "stroke":None
+        }
         return chart
 
     attributes_for_recursion = ['layer','hconcat','vconcat']
@@ -35,8 +45,15 @@ def recursively_add_to_mark(chart,cursor_type):
     return chart
 
 ALX_SELECTION_PREFIX = "ALX_SELECTION_"
+ALX_SELECTION_SUFFIX= {
+    "filter":"_FILTER",
+    "scale_bind":"_FILTER",
+    "highlight":"_HIGHLIGHT",
+    "group":"_GROUP"
+}
 
 def check_if_unit_line(chart):
+    
     if isinstance(chart.mark,str):
         return chart.mark == 'line' or chart.mark == 'area'  
     else: 
@@ -52,7 +69,7 @@ def check_if_line(chart):
         # instead, it should see if any exists, and if it does, it should use that as the item to search
         if alt_get(chart,attribute):
           for unit_spec in chart[attribute]:
-              if(check_if_unit_line(unit_spec)):
+              if(check_if_line(unit_spec)):
                 return True
     return False
 
@@ -74,28 +91,33 @@ def create_selection(chart,interaction):
         if has_options and 'encodings' in interaction.options:
             encodings = interaction.options['encodings']
 
-
-        selection = alt.selection_interval(encodings=encodings, name=ALX_SELECTION_PREFIX+'drag')
+        name = ALX_SELECTION_PREFIX+'drag'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+        selection = alt.selection_interval(encodings=encodings, name=name)
     if interaction.action['trigger'] == "click":
-        selection = alt.selection_point(name=ALX_SELECTION_PREFIX+'click')
+        name = ALX_SELECTION_PREFIX+'click'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+
+        selection = alt.selection_point(name=name)
         
         if 'target' in interaction.action:
             field = get_field_from_encoding(chart,interaction.action['target'])
-            selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=[interaction.action['target']], fields=[field])
+            selection=alt.selection_point(name=name, encodings=[interaction.action['target']], fields=[field])
         else: 
             x_is_aggregate = check_axis_aggregate(chart,'x')
             y_is_aggregate = check_axis_aggregate(chart,'y')
+
             if  x_is_aggregate and not y_is_aggregate:
                 # if x is aggregated (ie is a count), then add y field to selection 
-                selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=['y'])
+                selection=alt.selection_point(name=name, encodings=['y'])
             elif not  x_is_aggregate and  y_is_aggregate:
                 # if both of them are 
-                selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=['x'])
+                selection=alt.selection_point(name=name, encodings=['x'])
             elif not x_is_aggregate and not y_is_aggregate:
-                selection=alt.selection_point(name=ALX_SELECTION_PREFIX+'click', encodings=['x','y'])
+                selection=alt.selection_point(name=name, encodings=['x','y'])
 
     if interaction.action['trigger'] == "type":
-        selection = alt.param(name=ALX_SELECTION_PREFIX+'query',value="",bind=alt.binding(input='text', placeholder='Type to search...'))
+        name = ALX_SELECTION_PREFIX+'query'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+
+        selection = alt.param(name=name,value="",bind=alt.binding(input='text', placeholder='Type to search...'))
 
     if interaction.action['trigger'] == "panzoom":
         encodings =  [] # by default
@@ -103,7 +125,8 @@ def create_selection(chart,interaction):
             encodings.append('x')
         if interaction.options['bind_y']:
             encodings.append('y')
-        selection = alt.selection_interval(name=ALX_SELECTION_PREFIX+'panzoom',bind="scales", encodings=encodings)
+        name = ALX_SELECTION_PREFIX+'panzoom'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+        selection = alt.selection_interval(name=name,bind="scales", encodings=encodings)
     
     return selection 
 
@@ -122,7 +145,28 @@ def add_colors(chart,data,field):
     chart=chart.encode(alt.Color(field=field,scale=color_scale))
     return chart
 
-def apply_effect(previous_chart,interaction,selection):
+def apply_effect(chart,interaction,selection):
+    attributes_for_recursion = ['layer','hconcat','vconcat']
+    for attribute in attributes_for_recursion:
+
+        if alt_get(chart,attribute):
+            specs = []
+            for unit_spec in chart[attribute]:
+                #if alt_get(chart,'data') and not is_undefined(chart.data):
+                #    print('adding data',len(chart.data))
+                    #unit_spec.data = chart.data
+
+                
+                specs.append(apply_effect(unit_spec,interaction,selection))
+            chart[attribute] = specs
+
+
+    if getattr(chart,'mark',None) is not None:
+        chart =  apply_effect_recurse(chart,interaction,selection)
+    
+    return chart
+
+def apply_effect_recurse(previous_chart,interaction,selection):
     chart = previous_chart.copy(deep=True)
     # alter the chart object to allow for interaction
     # apply the transform 
@@ -231,22 +275,6 @@ def group_chart(chart,interaction,selection):
                 if category == 'color':
                     chart = add_colors(chart,chart.data[field],"_grouping_column")
 
-                
-                
-                if category == 'color':
-                    # apply colors to layers
-                    unique_values = pd.unique(chart.data[field])
-                    unique_values.sort()
-                    domain = ['Group']
-                    range = ['black']
-                    for index,value in enumerate(unique_values):
-                        domain.append(value)
-                        if index < len(DEFAULT_COLORS):
-                           range.append(DEFAULT_COLORS[index])
-                        else: 
-                            range.append("lightgray")
-                    color_scale = alt.Scale(domain=domain,range=range)
-                    chart=chart.encode(alt.Color(field="_grouping_column",scale=color_scale))
                 # add mouse overlay
                 params = chart.params
                 chart.params = []
@@ -293,14 +321,17 @@ def filter_chart(chart,interaction,selection):
     # for each encoding in selection 
     selection_type = getattr(selection.param,'select',{})
     encodings = getattr(selection_type,'encodings',None) or ["x","y"] # default to x and y to maintain reference of chart
+    
+    # fix the encoding scales so that the view remains static 
     if encodings and not is_undefined(encodings): 
         for encoding in encodings:
             field = get_field_from_encoding(chart,encoding)
-
-            extent = extent_from_column(chart.data,field)
-            # TODO: copy the existing scale, just overwrite the domain
-            scale = alt.Scale(domain=extent)
-            chart['encoding'][encoding]['scale'] = scale
+            
+            if not is_undefined(chart.data) and field:
+                extent = extent_from_column(chart.data,field)
+                # TODO: copy the existing scale, just overwrite the domain
+                scale = alt.Scale(domain=extent)
+                chart['encoding'][encoding]['scale'] = scale
             
     return chart
 
@@ -350,10 +381,12 @@ def highlight_chart(chart,interaction,selection):
         else:
             chart.layer[1].transform = [filter_transform]
 
-
     elif not x_binned and not y_binned :
+        # non-binned charts ()
+
+
         # if the chart already has a color encoding, use that as a conditional
-        highlight = get_field_from_encoding(chart,'color')  or  alt.value('steelblue')
+        highlight = get_field_from_encoding(chart,'color') or alt.value('steelblue')
 
         color = None
 
@@ -369,7 +402,7 @@ def highlight_chart(chart,interaction,selection):
     else:
         # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
-
+        #chart.encoding.color.scale=alt.Scale(scheme='greys')
         chart.encoding.color = alt.value('lightgray')
         chart = chart + chart 
         chart.layer[1].encoding.color = color_encoding
@@ -510,12 +543,13 @@ def process_groups(chart,groups):
 def add_cursor(chart,interaction):
     if interaction.action['trigger'] == "drag":
         chart = recursively_add_to_mark(chart,'crosshair')
-        chart.view ={"cursor":"crosshair","stroke":None}
+
+        #chart.view ={"cursor":"crosshair","stroke":None}
     if interaction.action['trigger'] == "click":
         chart = recursively_add_to_mark(chart,'pointer')
     if interaction.action['trigger'] == "panzoom":
         chart = recursively_add_to_mark(chart,'move')
-        chart.view ={"cursor":"move"}
+        #chart.view ={"cursor":"move"}
     return chart
 
 def add_interaction(chart, interaction):
@@ -523,7 +557,6 @@ def add_interaction(chart, interaction):
     parameter = create_selection(chart,interaction)
     interaction.set_selection(parameter)
     chart=chart.add_params(parameter)
-
     chart =  apply_effect(chart,interaction,parameter)
     chart = add_cursor(chart,interaction)
 
