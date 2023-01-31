@@ -1,5 +1,7 @@
 """Interactions module."""
 
+import sys
+sys.path.insert(0, '/Users/dylanwootton/Documents/GitHub/altair/altair')
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -91,10 +93,10 @@ def create_selection(chart,interaction):
         if has_options and 'encodings' in interaction.options:
             encodings = interaction.options['encodings']
 
-        name = ALX_SELECTION_PREFIX+'drag'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+        name = ALX_SELECTION_PREFIX+'drag'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
         selection = alt.selection_interval(encodings=encodings, name=name)
     if interaction.action['trigger'] == "click":
-        name = ALX_SELECTION_PREFIX+'click'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+        name = ALX_SELECTION_PREFIX+'click'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
 
         selection = alt.selection_point(name=name)
         
@@ -115,7 +117,7 @@ def create_selection(chart,interaction):
                 selection=alt.selection_point(name=name, encodings=['x','y'])
 
     if interaction.action['trigger'] == "type":
-        name = ALX_SELECTION_PREFIX+'query'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+        name = ALX_SELECTION_PREFIX+'query'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
 
         selection = alt.param(name=name,value="",bind=alt.binding(input='text', placeholder='Type to search...'))
 
@@ -125,7 +127,7 @@ def create_selection(chart,interaction):
             encodings.append('x')
         if interaction.options['bind_y']:
             encodings.append('y')
-        name = ALX_SELECTION_PREFIX+'panzoom'+ALX_SELECTION_SUFFIX[interaction.effect.transform]
+        name = ALX_SELECTION_PREFIX+'panzoom'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
         selection = alt.selection_interval(name=name,bind="scales", encodings=encodings)
     
     return selection 
@@ -203,9 +205,10 @@ def group_chart(chart,interaction,selection):
                 continue
 
             # check if field is an independent axis 
+            group_name = "ALX_GROUP_COLUMN_" + field
             if_statement = f'''
-              if(isDefined({selection.name}["_grouping_column"]),
-                indexof({selection.name}["_grouping_column"],datum["{field}"]) > -1 ?
+              if(isDefined({selection.name}["{group_name}"]),
+                indexof({selection.name}["{group_name}"],datum["{field}"]) > -1 ?
                     "Group" : datum["{field}"],
                 datum["{field}"]
               ) 
@@ -214,7 +217,7 @@ def group_chart(chart,interaction,selection):
 
 
             # must pass as a dictionary because of use of as (a reserved keyword)
-            calculate_transform = alt.CalculateTransform(**{'calculate':if_statement,'as':"_grouping_column"})
+            calculate_transform = alt.CalculateTransform(**{'calculate':if_statement,'as':group_name})
 
             if not is_undefined(chart.transform):
                 chart.transform.insert(0,calculate_transform)
@@ -237,7 +240,7 @@ def group_chart(chart,interaction,selection):
                 groupby = [x_field]
                 # if color was used to create separate data points, then group by color
                 if color_field:
-                  groupby.append('_grouping_column')
+                  groupby.append(group_name)
 
 
                 y_avg = f'avg{y_field}'
@@ -253,10 +256,10 @@ def group_chart(chart,interaction,selection):
             # TODO: calculate another datum property that can be used for tooltips
 
             if_2 = f'''
-            if(isDefined({selection.name}["_grouping_column"]),
-              datum["_grouping_column"] == "Group"?
-                  {selection.name}["_grouping_column"] : datum["_grouping_column"],
-              datum["_grouping_column"]
+            if(isDefined({selection.name}["{group_name}"]),
+              datum["{group_name}"] == "Group"?
+                  {selection.name}["{group_name}"] : datum["{group_name}"],
+              datum["{group_name}"]
             ) + " : " + datum["{y_field}"]
             '''
 
@@ -267,13 +270,13 @@ def group_chart(chart,interaction,selection):
             chart= chart.encode(tooltip=alt.Tooltip("_tooltip_column",type='nominal'))
 
 
-            chart.encoding[category].field = "_grouping_column" 
+            chart.encoding[category].field = group_name
 
             # for line charts, add interaction to an overlay so that mouse events have larger hitbox
             if check_if_line(chart):
                 # do 
                 if category == 'color':
-                    chart = add_colors(chart,chart.data[field],"_grouping_column")
+                    chart = add_colors(chart,chart.data[field],group_name)
 
                 # add mouse overlay
                 params = chart.params

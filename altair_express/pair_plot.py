@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '/Users/dylanwootton/Documents/GitHub/altair/altair')
 import altair as alt
 from .distributional import hist
 from .relational.relational import scatterplot

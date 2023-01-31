@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '/Users/dylanwootton/Documents/GitHub/altair/altair')
 import altair as alt
 from .distributional import hist, countplot
 from pandas.api.types import is_numeric_dtype

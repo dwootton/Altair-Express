@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import sys
+sys.path.insert(0, '/Users/dylanwootton/Documents/GitHub/altair/altair')
 import altair as alt
 
 def add_encoding(chart,color):
