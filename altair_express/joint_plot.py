@@ -1,7 +1,7 @@
 
 import altair as alt
-from ..distributional import hist
-from .relational import scatterplot
+from .distributional import hist
+from .relational.relational import scatterplot
 
 def joint_plot(data=None,x=None, y=None):
   
