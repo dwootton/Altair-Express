@@ -49,7 +49,7 @@ ALX_SELECTION_PREFIX = "ALX_SELECTION_"
 ALX_SELECTION_SUFFIX= {
     "filter":"_FILTER",
     "scale_bind":"_FILTER",
-    "highlight":"_HIGHLIGHT",
+    "highlight":"_FILTER",
     "group":"_GROUP"
 }
 

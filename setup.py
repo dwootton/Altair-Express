@@ -9,6 +9,7 @@ with open('README.rst') as readme_file:
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
+    
 install_requires=['altair @ https://github.com/dwootton/altair/releases/download/v4.3.1/altair-4.3.0.dev0.tar.gz']
 
 requirements = ['Click>=7.0', 'pandas','altair','numpy']
