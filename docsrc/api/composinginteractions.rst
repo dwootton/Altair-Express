@@ -4,7 +4,7 @@
 Composing Interactions
 ============
 
-You can compose interactions by adding them together like a 
+You can compose interactions by adding them together as if you're layering multiple charts:
 
 .. altair-plot::
     :output: repr
