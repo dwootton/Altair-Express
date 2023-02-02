@@ -1,7 +1,7 @@
 .. _filter-type:
 
 ============
-Filter Brush
+Filter Type
 ============
 
 

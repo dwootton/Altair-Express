@@ -20,6 +20,6 @@ specification affects analysis patterns.
 .. toctree::
     :maxdepth: 2
 
-    Interactions <api/interactiontypology>
-    Visualizations <api/visualizationtypology>
+    Interactions <API/interactiontypology>
+    Visualizations <API/visualizationtypology>
 
