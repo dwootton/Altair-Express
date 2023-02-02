@@ -264,7 +264,7 @@ def group_chart(chart,interaction,selection):
               datum["{group_name}"] == "Group"?
                   {selection.name}["{group_name}"] : datum["{group_name}"],
               datum["{group_name}"]
-            ) + " : " + datum["{y_field}"]
+            )
             '''
 
             if_2= ' '.join(if_2.split())
