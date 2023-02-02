@@ -8,8 +8,8 @@ Meaningful Interaction for Analysis: Altair Express
 Altair express is a high-level data visualization library to make
 interactive data analysis easier. In Altair Express 
 (referred to as **alx**) creating an interactive chart can be done
-in one function call; however, users can customize the interactive behavior 
-:ref:`interaction-typology`. To bridge the gap between the
+in one function call; however, users can customize the interactive behavior via
+:ref:`interaction-techniques`. To bridge the gap between the
 visualization and your analysis, we provide the ability to copy
 your interactions into pandas commands such as filter or group
 by.
@@ -20,6 +20,6 @@ specification affects analysis patterns.
 .. toctree::
     :maxdepth: 2
 
-    Interactions <API/interactiontypology>
+    Interactions <API/interactiontechniques>
     Visualizations <API/visualizationtypology>
 

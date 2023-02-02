@@ -20,3 +20,7 @@ Visualization Typology
 :ref:`countplot`  
 
 
+:ref:`heatmap`
+
+
+:ref:`barplot`

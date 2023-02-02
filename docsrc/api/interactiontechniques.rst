@@ -1,12 +1,12 @@
-.. _interaction-typology:
+.. _interaction-techniques:
 
 ============
-Interaction Typology
+Interaction Techniques
 ============
 
 
 +-----------------------+------------------------+-----------------+--------------+
-| Interaction Typology  | Command                | Pandas Command  | Status       |
+| Interaction Techniques| Command              | Pandas Command    | Status       |
 +=======================+========================+=================+==============+
 | :ref:`filter-brush`   | alx.filter_brush()     | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
@@ -14,15 +14,15 @@ Interaction Typology
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
+| :ref:`filter-color`   | alx.filter_color()     | query           | implemented  |
++-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-brush`| alx.highlight_brush()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-point`| alx.highlight_point()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| highlight_type        | alx.highlight_type()   | query (filter)  | implemented  |
-+-----------------------+------------------------+-----------------+--------------+
 | :ref:`group-point`    | alx.group_point()      | groupby         | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| panzoom               | alx.panzoom()          | query (filter)  | implemented  |
+| :ref:`panzoom`        | alx.panzoom()          | None            | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | group_brush           | alx.group_brush()      | groupby         | in-progress  |
 +-----------------------+------------------------+-----------------+--------------+
