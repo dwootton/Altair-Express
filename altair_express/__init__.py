@@ -2,7 +2,7 @@
 
 __author__ = """Dylan Wootton"""
 __email__ = 'dwootton@mit.edu'
-__version__ = '0.1.22'
+__version__ = '0.1.23'
 
 from .jointplot import *
 from .pairplot import *
