@@ -12,7 +12,7 @@ Interaction Typology
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`filter-point`   | alx.filter_point()     | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| filter_type           | alx.filter_type()      | query (filter)  | implemented  |
+| :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-brush`| alx.highlight_brush()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
