@@ -28,7 +28,7 @@ def recursively_add_to_mark(chart,cursor_type):
 
 # todo fix this, to not add click pointer to background 
     
-    if (hasattr(chart,'mark') and cursor_type != "pointer") or hasattr(chart,'layer') :
+    if  cursor_type != "pointer" and (hasattr(chart,'mark') or hasattr(chart,'layer')):
         chart.view = {
             "cursor":cursor_type,
             "stroke":None
