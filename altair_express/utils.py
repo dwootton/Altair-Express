@@ -14,8 +14,8 @@ def add_encoding(chart,color):
 def is_axis_aggregate(chart,axis):
     if not getattr(chart,'encoding',None) or is_undefined(chart.encoding):
         return False
-    
     encoding = chart.encoding[axis]
+
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:

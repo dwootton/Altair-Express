@@ -106,19 +106,24 @@ def create_selection(chart,interaction):
             x_is_aggregate = check_axis_aggregate(chart,'x')
             y_is_aggregate = check_axis_aggregate(chart,'y')
 
+            fields = []
+            if get_field_from_encoding(chart,'column'):
+                fields = [get_field_from_encoding(chart,'column')]
+            
+
             if  x_is_aggregate and not y_is_aggregate:
                 # if x is aggregated (ie is a count), then add y field to selection 
-                selection=alt.selection_point(name=name, encodings=['y'])
+                selection=alt.selection_point(name=name, encodings=['y'],fields=fields)
             elif not  x_is_aggregate and  y_is_aggregate:
                 # if both of them are 
-                selection=alt.selection_point(name=name, encodings=['x'])
+                selection=alt.selection_point(name=name, encodings=['x'],fields=fields)
             elif not x_is_aggregate and not y_is_aggregate:
-                selection=alt.selection_point(name=name, encodings=['x','y'])
+                selection=alt.selection_point(name=name, encodings=['x','y'],fields=fields)
 
     if interaction.action['trigger'] == "type":
         name = ALX_SELECTION_PREFIX+'query'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
 
-        selection = alt.param(name=name,value="",bind=alt.binding(input='text', placeholder='Type to search...'))
+        selection = alt.param(name=name,value="",bind=alt.binding(name=interaction.action['target']+": ",input='text', placeholder='Type to search...'))
 
     if interaction.action['trigger'] == "panzoom":
         encodings =  [] # by default
@@ -195,7 +200,7 @@ def group_chart(chart,interaction,selection):
     if interaction.action['trigger'] == "click":
         # determine if either x or y is independent
         # if so, group by that axis, do all groupings 
-        groupby_category = ['color','x','y'] 
+        groupby_category = ['column','color','x','y'] 
         
         for category in groupby_category:
             field = get_field_from_encoding(chart,category)
@@ -309,8 +314,9 @@ def filter_chart(chart,interaction,selection):
     filter_transform = alt.FilterTransform({"param": selection.name})
 
     # for text box interaction, use query filter
+    #(!ALX_SELECTION_query_FILTER || test(regexp(ALX_SELECTION_query_FILTER), toString(datum['job'])))
     if interaction.action['trigger'] == "type":
-        query_string = f"(!query || test(regexp(query,'i'), toString(datum['{interaction.action['target']}'])))"
+        query_string = f"(!{selection.name} || test(regexp({selection.name},'i'), toString(datum['{interaction.action['target']}'])))"
         filter_transform = alt.FilterTransform(**{"filter": query_string})
 
 
@@ -390,13 +396,12 @@ def highlight_chart(chart,interaction,selection):
         # if the chart already has a color encoding, use that as a conditional
         highlight = get_field_from_encoding(chart,'color') or alt.value('steelblue')
 
-        color = None
+        color = alt.condition(selection,highlight,alt.value('lightgray'))
 
         if interaction.action['trigger'] == "type":
              query_string = f"(!query || test(regexp(query,'i'), toString(datum['{interaction.action['target']}'])))"
              color = alt.condition(query_string,highlight,alt.value('lightgray'))
-        else:
-             color = alt.condition(selection,highlight,alt.value('lightgray'))
+             
 
      
         chart = add_encoding(chart,color)

@@ -1,4 +1,4 @@
-.. group-point:
+.. _group-point:
 
 ============
 Group Point

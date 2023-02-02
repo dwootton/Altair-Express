@@ -39,6 +39,7 @@ extensions = [
     # "sphinxext.rediraffe",
 ]
 
+
 altair_plot_links = {"editor": True, "source": False, "export": False}
 
 autodoc_default_flags = ["members", "inherited-members"]
@@ -186,6 +187,7 @@ html_static_path = ["_static", "_images"]
 def setup(app):
     app.add_css_file("theme_overrides.css")
     app.add_css_file("custom.css")
+
 
 
 # Add any extra paths that contain custom files (such as robots.txt or

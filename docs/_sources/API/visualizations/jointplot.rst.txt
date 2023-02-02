@@ -1,4 +1,4 @@
-.. _joint-plot:
+.. _jointplot:
 
 ============
 Joint Plot
@@ -10,8 +10,8 @@ Joint Plot
 
     alx.highlight_brush() + alx.jointplot(data=data.cars(),x='Miles_per_Gallon',y='Horsepower')
 
-Jointplots visualize distributional and correlation of two variables.
-Using a bivariate scatterplot plot with marginal histogram univariate plots, Jointplots
+The jointplot() function is useful for understanding the distribution and relationship between two variables in a dataset.
+Using a scatterplot plot with marginal histogram plots, Jointplots
 assist in understanding how variables might interact. 
 
 

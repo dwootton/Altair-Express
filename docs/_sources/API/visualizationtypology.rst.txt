@@ -4,4 +4,19 @@
 Visualization Typology
 ============
 
-:ref:`joint-plot`  
+:ref:`jointplot`  
+
+
+:ref:`pairplot`
+
+
+
+:ref:`lineplot`    
+
+
+:ref:`hist`  
+
+
+:ref:`countplot`  
+
+
