@@ -351,6 +351,10 @@ def highlight_chart(chart,interaction,selection):
    
 
     # if any of the axes are aggregated
+    x_agg = check_axis_aggregate(chart,'x')
+    y_agg = check_axis_aggregate(chart,'y')
+    print('is agg',x_agg,y_agg)
+
     x_binned = check_axis_binned(chart,'x')
     y_binned = check_axis_binned(chart,'y')
     is_line = check_if_line(chart)
@@ -389,7 +393,7 @@ def highlight_chart(chart,interaction,selection):
         else:
             chart.layer[1].transform = [filter_transform]
 
-    elif not x_binned and not y_binned :
+    elif (not x_agg and not y_agg) and (not x_binned and not y_binned) :
         # non-binned charts ()
 
 
