@@ -324,64 +324,6 @@ specification affects analysis patterns.</p>
 <li class="toctree-l1"><a class="reference internal" href="API/interactiontechniques.html">Interactions</a></li>
 </ul>
 </div>
-<span class="target" id="module-altair_express"></span><p>Top-level package for Altair Express.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="altair_express.is_numeric_dtype">
-<span class="sig-prename descclassname"><span class="pre">altair_express.</span></span><span class="sig-name descname"><span class="pre">is_numeric_dtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr_or_dtype</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#altair_express.is_numeric_dtype" title="Permalink to this definition">#</a></dt>
-<dd><p>Check whether the provided array or dtype is of a numeric dtype.</p>
-<section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>arr_or_dtype<span class="classifier">array-like or dtype</span></dt><dd><p>The array or dtype to check.</p>
-</dd>
-</dl>
-</section>
-<section id="returns">
-<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>boolean</dt><dd><p>Whether or not the array or dtype is of a numeric dtype.</p>
-</dd>
-</dl>
-</section>
-<section id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">)</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">)</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]))</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]))</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">))</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</section>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="altair_express.jointplot">
-<span class="sig-prename descclassname"><span class="pre">altair_express.</span></span><span class="sig-name descname"><span class="pre">jointplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#altair_express.jointplot" title="Permalink to this definition">#</a></dt>
-<dd><p>Return the most important thing about a person.
-Parameters
-———-
-data</p>
-<blockquote>
-<div><p>A string indicating the name of the person.</p>
-</div></blockquote>
-</dd></dl>
-
 </section>
 
 
@@ -408,36 +350,6 @@ data</p>
           
             <div class="bd-sidebar-secondary bd-toc">
               
-<div class="toc-item">
-  
-<div class="tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-</div>
-<nav id="bd-toc-nav" class="page-toc">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#altair_express.is_numeric_dtype">
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     is_numeric_dtype()
-    </span>
-   </code>
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#altair_express.jointplot">
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     jointplot()
-    </span>
-   </code>
-  </a>
- </li>
-</ul>
-
-</nav>
-</div>
-
 <div class="toc-item">
   
 <div id="searchbox"></div>

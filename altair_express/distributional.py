@@ -24,18 +24,21 @@ def create_hist_dataframe(data=None, *, x=None, y=None):
   
   return data,x,y
 
-def hist(data=None,x=None,color=None, max_bins=10,width=200,height=50,effects=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis()):
+def hist(data=None,x=None,color=None, max_bins=10,width=200,height=50,effects=None,x_axis = alt.Axis(),y_axis=alt.Axis()):
   # ensures that data is the data and x and y are column names
   data,x,y = create_hist_dataframe(data=data,x=x) 
-  chart = None
 
-
+  fill="steelblue"
+  
+  if color and color not in data.columns:
+    fill = color
+    color = None
 
   chart = alt.Chart(data)
 
   if x is not None:
     chart = chart.mark_bar(color=fill).encode(
-            alt.X(f'{x}:Q', bin=alt.Bin(maxbins=max_bins), axis=xAxis),alt.Y('count()',axis=yAxis)
+            alt.X(f'{x}:Q', bin=alt.Bin(maxbins=max_bins), axis=x_axis),alt.Y('count()',axis=y_axis)
               ) 
 
     if color:

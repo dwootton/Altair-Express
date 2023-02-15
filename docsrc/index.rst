@@ -20,7 +20,3 @@ specification affects analysis patterns.
     Interactions <API/interactiontechniques>
     Visualizations <API/visualizationtypology>
 
-
-.. automodule:: altair_express
-    :members:
-    :imported-members:

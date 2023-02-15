@@ -1,0 +1,40 @@
+.. _effects-object:
+
+============
+Effect Objects
+============
+
+Sometimes you want to apply an interactions effect to a certain visualization without making that chart interactive itself. 
+For example, you might want to highlight a certain group of points in a scatterplot, but you don't want to also brush on a countplot.
+You can accomplish this by passing in a your interaction object in the effects dictionary of a chart. 
+
+.. warning::
+    Effect objects are still quite experimental. Right now the only effect that works is the filter and highlight effects.
+    
+
+You can compose interactions by adding them together as if you're layering multiple charts:
+
+.. altair-plot::
+    import altair_express as alx
+    from vega_datasets import data
+
+    overview_itx = alx.highlight_brush()
+    group_itx = alx.group_color()
+
+    chart_1 = overview_itx + alx.lineplot(data=data.stocks(),x='date',xAxis=None,yAxis=None,y='price',color='symbol',height=100,width=500)
+
+    # here we create the effect object by passing in the interaction object from chart_1
+    effect = {"filter":overview_itx}
+
+
+    # then we pass that object in to chrt2, allowing chrt2
+    chart_2 = group_itx + alx.lineplot(data=data.stocks(),x='date',y='price',color='symbol',effects=effect, width=500)
+
+    # finally we vertically concatenate the two charts together
+    chart_1 & chart_2
+
+.. note::
+    You may have noticed that our ``overview_itx`` object is a highlight brush, but we pass it in as a filter effect. 
+    This is a unique capabilities between highlight and filter interactions as they can be interchanged freely. 
+    
+
