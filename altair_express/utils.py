@@ -97,7 +97,7 @@ def check_axis_aggregate(chart,axis):
 
 def extent_from_column(data,column):
     if alt.utils.infer_vegalite_type(data[column]) == 'ordinal' or alt.utils.infer_vegalite_type(data[column]) == 'nominal':
-        return np.unique(data[column])
+        return pd.unique(data[column])
     elif alt.utils.infer_vegalite_type(data[column]) == 'temporal':
         # TODO: fix error where a month is specified
         # ie we want to create a stacked bar chart by months, even with a temporal column, we should have an ordinal value

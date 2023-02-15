@@ -136,7 +136,7 @@ def create_selection(chart,interaction):
     
     return selection 
 
-def add_colors(chart,data,field):
+def add_colors(chart,data,field,legend=alt.Legend()):
     unique_values = pd.unique(data)
     unique_values.sort()
     domain = ['Group']
@@ -148,7 +148,7 @@ def add_colors(chart,data,field):
         else: 
             range.append("lightgray")
     color_scale = alt.Scale(domain=domain,range=range)
-    chart=chart.encode(alt.Color(field=field,scale=color_scale))
+    chart=chart.encode(alt.Color(field=field,scale=color_scale,legend=legend))
     return chart
 
 def apply_effect(chart,interaction,selection):
@@ -172,6 +172,13 @@ def apply_effect(chart,interaction,selection):
     
     return chart
 
+def add_tooltip_chart(chart,interaction,selection):
+    if interaction.action['trigger'] == "click":
+        chart = chart.add_selection(selection)
+        chart = chart.encode(tooltip=interaction.action['target'])
+    return chart
+
+
 def apply_effect_recurse(previous_chart,interaction,selection):
     chart = previous_chart.copy(deep=True)
     # alter the chart object to allow for interaction
@@ -191,6 +198,9 @@ def apply_effect_recurse(previous_chart,interaction,selection):
     if interaction.effect['transform'] == "scale_bind":
         chart = pan_zoom_chart(chart,interaction,selection)
 
+    if interaction.effect['transform'] ==  "tooltip":
+        chart = add_tooltip_chart(chart,interaction,selection)
+        
     return chart
 
 
@@ -262,7 +272,7 @@ def group_chart(chart,interaction,selection):
             if_2 = f'''
             if(isDefined({selection.name}["{group_name}"]),
               datum["{group_name}"] == "Group"?
-                  {selection.name}["{group_name}"] : datum["{group_name}"],
+                  "Group: ["+{selection.name}["{group_name}"] +"]": datum["{group_name}"],
               datum["{group_name}"]
             )
             '''
@@ -280,7 +290,7 @@ def group_chart(chart,interaction,selection):
             if check_if_line(chart):
                 # do 
                 if category == 'color':
-                    chart = add_colors(chart,chart.data[field],group_name)
+                    chart = add_colors(chart,chart.data[field],group_name,legend=None)
 
                 # add mouse overlay
                 params = chart.params
@@ -330,12 +340,15 @@ def filter_chart(chart,interaction,selection):
     selection_type = getattr(selection.param,'select',{})
     encodings = getattr(selection_type,'encodings',None) or ["x","y"] # default to x and y to maintain reference of chart
     
+    # if the interaction occurs via a widget, then axis should be altered
+    interaction_occurs_on_chart = not interaction.action['trigger'] == "type"
+
     # fix the encoding scales so that the view remains static 
-    if encodings and not is_undefined(encodings): 
+    if encodings and not is_undefined(encodings) and interaction_occurs_on_chart: 
         for encoding in encodings:
             field = get_field_from_encoding(chart,encoding)
             
-            if not is_undefined(chart.data) and field:
+            if not is_undefined(chart.data) and field and field in chart.data.columns:
                 extent = extent_from_column(chart.data,field)
                 # TODO: copy the existing scale, just overwrite the domain
                 scale = alt.Scale(domain=extent)
@@ -353,7 +366,6 @@ def highlight_chart(chart,interaction,selection):
     # if any of the axes are aggregated
     x_agg = check_axis_aggregate(chart,'x')
     y_agg = check_axis_aggregate(chart,'y')
-    print('is agg',x_agg,y_agg)
 
     x_binned = check_axis_binned(chart,'x')
     y_binned = check_axis_binned(chart,'y')

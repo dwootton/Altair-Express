@@ -18,24 +18,34 @@ def create_hist_dataframe(data=None, *, x=None, y=None):
     if isinstance(y, pd.Series):
       data['y'] = y
       y = 'y'
+  elif isinstance(data, pd.Series):
+    data = pd.DataFrame({'x':data})
+    x = 'x'
   
   return data,x,y
 
-def hist(data=None,x=None,y=None, width=200,height=50,effects=None,color=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis()):
+def hist(data=None,x=None,color=None, max_bins=10,width=200,height=50,effects=None,fill="steelblue",xAxis = alt.Axis(),yAxis=alt.Axis()):
   # ensures that data is the data and x and y are column names
-  data,x,y = create_hist_dataframe(data=data,x=x,y=y) 
+  data,x,y = create_hist_dataframe(data=data,x=x) 
   chart = None
 
+
+
   chart = alt.Chart(data)
-  if x is not None and y is None:
+
+  if x is not None:
     chart = chart.mark_bar(color=fill).encode(
-            alt.X(f'{x}:Q', bin=True, axis=xAxis),alt.Y('count()',axis=yAxis)
-              ) 
-  elif x is  None and y is not None:
-    chart = chart.mark_bar(color=fill).encode(
-            alt.Y(f'{y}:Q', bin=True, axis=yAxis),alt.X('count()',axis=xAxis)
+            alt.X(f'{x}:Q', bin=alt.Bin(maxbins=max_bins), axis=xAxis),alt.Y('count()',axis=yAxis)
               ) 
 
+    if color:
+      chart = chart.encode(
+        alt.Color(f'{color}:N'), opacity=(alt.value(0.5))
+      )
+  else:
+    raise ValueError('[hist] no x value provided')
+
+    
   if effects:
     chart = process_effects(chart,effects)
 
@@ -51,7 +61,7 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
 
   facet_vars = [None]
   if groupby:
-    facet_vars=np.unique(data[groupby])
+    facet_vars=pd.unique(data[groupby])
 
 
   charts =[]
@@ -106,9 +116,8 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
   return final_chart
 
 
-def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=False, filters=None,width=250,height=150, max_bars = None):
-  if filters is None:
-    filters = []
+def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descending', limit=15, interactive=False, effects=None,width=250,height=150, max_bars = None):
+  
 
   if data is None:
     if x is None:
@@ -119,16 +128,24 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(), interactive=Fa
       x = 'x'
 
   # if x 
+  sort_order =  '-y' if sort=='descending' else 'y'
   chart = alt.Chart(data).mark_bar().encode(
-      alt.X(f'{x}:N',axis=xAxis,sort='-y'), # remove the sort as that will keep it consistent with the background
+      alt.X(f'{x}:N',axis=xAxis,sort=sort_order), # remove the sort as that will keep it consistent with the background
       alt.Y(f'count({x}):Q',axis=yAxis)
   )
    
-  if filters:
-     for filter in filters:
-        chart=chart.transform_filter(filter)
+  if effects:
+    chart = process_effects(chart,effects)
 
-  
+  if limit: 
+    chart=chart.transform_window(
+        rank='rank(count({x}))',
+        sort=[alt.SortField('count', order=sort)]
+    ).transform_filter(
+        alt.datum.rank < limit
+    )
+    
+   
   return chart.properties(
           width=width,
           height=height

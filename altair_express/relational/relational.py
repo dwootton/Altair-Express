@@ -36,7 +36,7 @@ def lineplot(data=None, *, x=None, y=None,color=None,filters=None,interactive=No
     if color not in data.columns:
         layers['fg']=layers['fg'].mark_line(fill=line_color)
     else:
-        unique = np.unique(data[color])
+        unique = pd.unique(data[color])
         layers['bg']=layers['bg'].encode(alt.Color(legend=None,field=color,scale=alt.Scale(domain=unique,range=['lightgray' for value in unique])))
         layers['fg']=layers['fg'].encode(alt.Color(field=color,scale=alt.Scale()))
 
