@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Composing Interactions &#8212; Altair Express 0.1.23 documentation</title>
+    <title>Composing Interactions &#8212; Altair Express 0.1.24 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -316,10 +316,10 @@
 <span class="n">overview</span> <span class="o">=</span> <span class="n">alx</span><span class="o">.</span><span class="n">filter_brush</span><span class="p">()</span>
 <span class="n">group_interaction</span> <span class="o">=</span> <span class="n">alx</span><span class="o">.</span><span class="n">group_color</span><span class="p">()</span>
 
-<span class="n">chrt1</span> <span class="o">=</span> <span class="n">overview</span> <span class="o">+</span> <span class="n">alx</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">stocks</span><span class="p">(),</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">,</span><span class="n">x_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;price&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;symbol&#39;</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">chrt2</span> <span class="o">=</span> <span class="n">group_interaction</span> <span class="o">+</span> <span class="n">alx</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">stocks</span><span class="p">(),</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;price&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;symbol&#39;</span><span class="p">,</span><span class="n">effects</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span><span class="n">overview</span><span class="p">})</span>
+<span class="c1">#chrt1 = overview + alx.lineplot(data=data.stocks(),x=&#39;date&#39;,x_axis=None,y_axis=None,y=&#39;price&#39;,color=&#39;symbol&#39;,height=100)</span>
+<span class="c1">#chrt2 = group_interaction + alx.lineplot(data=data.stocks(),x=&#39;date&#39;,y=&#39;price&#39;,color=&#39;symbol&#39;,effects={&quot;filter&quot;:overview})</span>
 
-<span class="n">chrt1</span> <span class="o">&amp;</span> <span class="n">chrt2</span>
+<span class="c1">#chrt1 &amp; chrt2</span>
 </pre></div>
 </div>
 </section>
