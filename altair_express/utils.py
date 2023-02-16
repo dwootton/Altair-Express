@@ -132,7 +132,6 @@ def get_field_from_encoding(chart,axis):
     return get_field_from_unit_encoding(chart,axis)
 
 def data_type_converter_old(data_type):
-  print(data_type)
   #TODO: add ordinal/maybe geojson
   if data_type == np.dtype('datetime64[ns]'):
     return 'T'#temporal

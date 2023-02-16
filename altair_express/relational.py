@@ -24,14 +24,8 @@ def generate_shorthand(input_field,data):
   return f'{input_field}:{data_type}'
 
 
-def process_chart_config(chart,x_axis,y_axis):
- 
-  if x_axis is None or y_axis is None:
-       chart = chart.properties(title=config["title"])
-   
-  return chart
 
-def lineplot(data=None, x=None, y=None,yAxis=alt.Axis(),xAxis=alt.Axis(),color=None,effects=None,width=200,height=200):
+def lineplot(data=None, x=None, y=None,y_Axis=alt.Axis(),xAxis=alt.Axis(),color=None,effects=None,width=200,height=200):
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
   x_shorthand = generate_shorthand(x,data)

@@ -124,7 +124,6 @@ def create_selection(chart,interaction):
 
             x_is_meaningful = x_field in chart.data.columns and not x_is_aggregate
             y_is_meaningful = y_field in chart.data.columns and not y_is_aggregate
-            print('meaningn',x_is_meaningful,y_is_meaningful)
             if  x_is_meaningful and not y_is_meaningful:
                 # if x is aggregated (ie is a count), then add y field to selection 
                 selection=alt.selection_point(name=name, encodings=['y'],fields=fields)
@@ -149,7 +148,16 @@ def create_selection(chart,interaction):
         selection = alt.selection_interval(name=name,bind="scales", encodings=encodings)
     
     if interaction.action['trigger'] == "mouseover":
-        selection = alt.selection_point( nearest=True, on='mouseover',clear= "mouseout", empty=False)
+        params = {
+            "on": "mouseover",
+            "empty": False,
+            "clear": "mouseout",
+        }
+
+        if 'nearest' in interaction.action:
+            params['nearest'] = True
+
+        selection = alt.selection_point(**params)
 
     return selection 
 
@@ -175,9 +183,7 @@ def apply_effect(chart,interaction,selection):
         if alt_get(chart,attribute):
             specs = []
             for unit_spec in chart[attribute]:
-                #if alt_get(chart,'data') and not is_undefined(chart.data):
-                #    print('adding data',len(chart.data))
-                    #unit_spec.data = chart.data
+               
 
                 
                 specs.append(apply_effect(unit_spec,interaction,selection))
@@ -503,10 +509,12 @@ point = {"trigger":"click"}
 color = {"trigger":"click","target":"color"}
 text = {"trigger":"type"}
 brush = {"trigger":"drag"}
-hover = {"trigger":"mouseover"}
+#hover = {"trigger":"mouseover"}
 
-def tooltip_hover():
-    return Interaction(effect=tooltip,action=hover)
+def tooltip_hover(nearest=False):
+    action = {"trigger":"mouseover"}
+    action['nearest'] = nearest
+    return Interaction(effect=tooltip,action=action)
 
 def highlight_brush(options=None):
     return Interaction(effect=highlight,action=brush,options=options)
