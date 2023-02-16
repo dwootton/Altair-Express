@@ -47,6 +47,7 @@ Visualization Typology
 
 :ref:`countplot`  
 
+:ref:`barplot`  
 
 :ref:`heatmap`
 

@@ -29,8 +29,6 @@ y_axis : alt.Axis() Object or None
     The column name of the data to be on the y-axis
 color : string 
     A valid CSS color to make the chart or a column name in the dataframe to color the bars by.
-max_bins : int
-    The maximum number of bins to use in the histogram. If the number of bins is not specified, the number of bins is set to 10.
 width : int
     The width of the chart in pixels.
 height : int
@@ -49,7 +47,7 @@ Interactive Brush
     from vega_datasets import data
     df = data.cars()
 
-    alx.highlight_brush()+alx.hist(df,x='Horsepower')
+    alx.highlight_brush() + alx.scatterplot(df,x='Horsepower',y='Miles_per_Gallon')
 
     
 Split by color  
@@ -60,5 +58,5 @@ Split by color
     from vega_datasets import data
     df = data.cars()
 
-    alx.hist(df,x='Horsepower',color='Origin', max_bins=25)
+    alx.highlight_color() + alx.scatterplot(df,x='Horsepower',y='Miles_per_Gallon', color='Origin')
 

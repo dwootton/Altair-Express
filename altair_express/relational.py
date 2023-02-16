@@ -24,26 +24,50 @@ def generate_shorthand(input_field,data):
   return f'{input_field}:{data_type}'
 
 
+def barplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color=None,column=None,effects=None,width=200,height=200):
+  data, x, y = create_dataframe(data=data,x=x,y=y)
 
-def lineplot(data=None, x=None, y=None,y_Axis=alt.Axis(),xAxis=alt.Axis(),color=None,effects=None,width=200,height=200):
+
+  params = {}
+  if color:
+     params['color'] = color
+      
+  if column:
+      params['column'] = column
+
+  
+  chart = alt.Chart(data).mark_bar().encode(
+    alt.X(x,axis=x_axis),
+    alt.Y(y,axis=y_axis),
+    **params
+  )
+  
+  if effects:
+    chart = process_effects(chart,effects)
+
+  return chart.properties(width=width,height=height)
+
+def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color=None,effects=None,width=200,height=200):
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
   x_shorthand = generate_shorthand(x,data)
   y_shorthand = generate_shorthand(y,data)
 
-  line_color = 'steelblue'
-  
-  chart = alt.Chart(data).mark_line().encode(
-    alt.X(shorthand=x_shorthand, scale=alt.Scale(zero=False),axis=xAxis),
-    alt.Y(shorthand=y_shorthand, scale=alt.Scale(zero=False),axis=yAxis),
-  )
+  fill = 'steelblue'
 
   if color:
     if color not in data.columns:
-        chart= chart.mark_line(fill=line_color)
+        fill = color
     else:
         chart=chart.encode(alt.Color(field=color,scale=alt.Scale()))
 
+  
+  chart = alt.Chart(data).mark_line(fill=fill).encode(
+    alt.X(shorthand=x_shorthand, scale=alt.Scale(zero=False),axis=x_axis),
+    alt.Y(shorthand=y_shorthand, scale=alt.Scale(zero=False),axis=y_axis),
+  )
+
+  
   if effects:
     chart = process_effects(chart,effects)
 
