@@ -29,7 +29,7 @@ def hist(data=None,x=None,color=None, max_bins=10,width=200,height=50,effects=No
   data,x,y = create_hist_dataframe(data=data,x=x) 
 
   fill="steelblue"
-  
+
   if color and color not in data.columns:
     fill = color
     color = None
@@ -119,7 +119,7 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
   return final_chart
 
 
-def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descending', limit=15, interactive=False, effects=None,width=250,height=150, max_bars = None):
+def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descending', limit=15, effects=None,width=250,height=150):
   
 
   if data is None:
@@ -131,6 +131,7 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descendin
       x = 'x'
 
   # if x 
+
   sort_order =  '-y' if sort=='descending' else 'y'
   chart = alt.Chart(data).mark_bar().encode(
       alt.X(f'{x}:N',axis=xAxis,sort=sort_order), # remove the sort as that will keep it consistent with the background
@@ -140,14 +141,6 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descendin
   if effects:
     chart = process_effects(chart,effects)
 
-  if limit: 
-    chart=chart.transform_window(
-        rank='rank(count({x}))',
-        sort=[alt.SortField('count', order=sort)]
-    ).transform_filter(
-        alt.datum.rank < limit
-    )
-    
    
   return chart.properties(
           width=width,

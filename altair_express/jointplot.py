@@ -2,8 +2,9 @@
 import altair as alt
 from .distributional import hist
 from .relational import scatterplot
+from .interactions import Interaction, apply_effect, process_effects
 
-def jointplot(data=None,x=None, y=None):
+def jointplot(data=None,x=None, y=None,effects=None,width=200,height=200):
   """
     Return the most important thing about a person.
     Parameters
@@ -19,4 +20,9 @@ def jointplot(data=None,x=None, y=None):
 
 
   # question is there a way to 
-  return alt.vconcat(top, alt.hconcat(mid,right,spacing=-10), spacing=-10)
+  chart =  alt.vconcat(top, alt.hconcat(mid,right,spacing=-10), spacing=-10)
+
+  if effects:
+    chart = process_effects(chart,effects)
+
+  return chart.properties(width=width,height=height)
