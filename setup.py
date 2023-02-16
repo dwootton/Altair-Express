@@ -46,6 +46,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/dwootton/altair_express',
-    version='0.1.24',
+    version='0.1.25',
     zip_safe=False,
 )
