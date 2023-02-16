@@ -19,7 +19,7 @@ def is_axis_aggregate(chart,axis):
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:
-        axis_encode = chart.to_dict()['encoding'].get(axis)
+        axis_encode = encoding #chart.to_dict()['encoding'].get(axis)
         if axis_encode is None:
             return False
         
@@ -85,13 +85,16 @@ def check_axis_binned(chart,axis):
 def check_axis_aggregate(chart,axis):
     is_aggregate = is_axis_aggregate(chart,axis)
     
-    attributes_for_recursion = ['layer','hconcat','vconcat']
+    attributes_for_recursion = ['layer','hconcat','vconcat','spec']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
           # TODO, make this recursive instead of one layer deep
-          for unit_spec in chart[attribute]:
-            if not is_axis_aggregate(unit_spec,axis):
-                return False
+          if attribute == 'spec':
+             return is_axis_aggregate(chart.spec,axis)
+          else:
+            for unit_spec in chart[attribute]:
+                if not is_axis_aggregate(unit_spec,axis):
+                    return False
            
     return is_aggregate
 
@@ -120,16 +123,18 @@ def get_field_from_unit_encoding(chart,encoding):
         return shorthand
     return None
 
-def get_field_from_encoding(chart,axis):
-    attributes_for_recursion = ['layer','hconcat','vconcat']
+def get_field_from_encoding(chart,field_name):
+    attributes_for_recursion = ['layer','hconcat','vconcat','spec']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
-          # TODO, make this recursive instead of one layer deep
-          for unit_spec in chart[attribute]:
-              if get_field_from_unit_encoding(unit_spec,axis):
-                  return get_field_from_unit_encoding(unit_spec,axis)
+          if attribute == 'spec':
+            return get_field_from_unit_encoding(chart.spec,field_name)
+          else:
+            for unit_spec in chart[attribute]:
+              if get_field_from_unit_encoding(unit_spec,field_name):
+                  return get_field_from_unit_encoding(unit_spec,field_name)
 
-    return get_field_from_unit_encoding(chart,axis)
+    return get_field_from_unit_encoding(chart,field_name)
 
 def data_type_converter_old(data_type):
   #TODO: add ordinal/maybe geojson

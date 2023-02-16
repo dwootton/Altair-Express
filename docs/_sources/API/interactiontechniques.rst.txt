@@ -24,6 +24,8 @@ Interaction Techniques
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`panzoom`        | alx.panzoom()          | None            | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
+| :ref:`highlight-color`| alx.highlight_color()  | query (filter   | implemented  |
++-----------------------+------------------------+-----------------+--------------+
 | group_brush           | alx.group_brush()      | groupby         | in-progress  |
 +-----------------------+------------------------+-----------------+--------------+
 | encode_axis           | alx.encode_axis()      | None            | in-progress  |

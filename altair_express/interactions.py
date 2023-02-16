@@ -178,21 +178,22 @@ def add_colors(chart,data,field,legend=alt.Legend()):
 
 def apply_effect(chart,interaction,selection):
     attributes_for_recursion = ['layer','hconcat','vconcat']
-    for attribute in attributes_for_recursion:
 
+    for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
+
             specs = []
             for unit_spec in chart[attribute]:
-               
-
-                
                 specs.append(apply_effect(unit_spec,interaction,selection))
             chart[attribute] = specs
 
-
+    
+    
     if getattr(chart,'mark',None) is not None:
         chart =  apply_effect_recurse(chart,interaction,selection)
-    
+    elif alt_get(chart,'spec') :
+       chart = apply_effect_recurse(chart,interaction,selection)
+
     return chart
 
 def add_tooltip_chart(chart,interaction,selection):
@@ -217,6 +218,16 @@ def apply_effect_recurse(previous_chart,interaction,selection):
     chart = previous_chart.copy(deep=True)
     # alter the chart object to allow for interaction
     # apply the transform 
+
+    # if chart is a facet, apply effect to the spec and then return the chart
+    if alt_get(chart,'spec'):
+        copied_chart = chart.spec.copy(deep=True)
+  
+        copied_chart.data = chart.data
+        
+        chart.spec = apply_effect_recurse(copied_chart,interaction,selection)
+        return chart
+
     
     if interaction.effect['transform'] == "filter":
          chart = filter_chart(chart,interaction,selection)
@@ -394,8 +405,7 @@ def pan_zoom_chart(chart,interaction,selection):
     return chart.add_params(selection)
 
 def highlight_chart(chart,interaction,selection):
-     # for text box interaction, use query filter
-   
+    # for text box interaction, use query filter
 
     # if any of the axes are aggregated
     x_agg = check_axis_aggregate(chart,'x')
@@ -443,7 +453,6 @@ def highlight_chart(chart,interaction,selection):
     elif (not x_agg and not y_agg) and (not x_binned and not y_binned) :
         # non-binned charts ()
 
-
         # if the chart already has a color encoding, use that as a conditional
         highlight = get_field_from_encoding(chart,'color') or alt.value('steelblue')
 
@@ -458,6 +467,7 @@ def highlight_chart(chart,interaction,selection):
         chart = add_encoding(chart,color)
         
     else:
+
         # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
         #chart.encoding.color.scale=alt.Scale(scheme='greys')
@@ -656,7 +666,15 @@ def add_interaction(chart, interaction):
     
     parameter = create_selection(chart,interaction)
     interaction.set_selection(parameter)
-    chart=chart.add_params(parameter)
+    # spec charts need param added to the spec itself, otherwise you get duplicate signals
+    if chart.spec:
+        print('in add parms to spec')
+        spec = chart.spec
+        spec = spec.add_params(parameter)
+        chart.spec = spec
+        print(chart.spec.params)
+    else:
+        chart=chart.add_params(parameter)
     chart =  apply_effect(chart,interaction,parameter)
     chart = add_cursor(chart,interaction)
 
