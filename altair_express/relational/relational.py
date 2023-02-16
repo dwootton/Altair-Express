@@ -16,18 +16,18 @@ def lineplot(data=None, *, x=None, y=None,color=None,filters=None,interactive=No
     filters = [] # as filters keeps last executions filters?
   # ensure that data 
   data, x, y = create_dataframe(data=data,x=x,y=y)
-  x_type = data_type_converter(data.dtypes[x])
-  y_type = data_type_converter(data.dtypes[y])
+  #x_type = data_type_converter(data.dtypes[x])
+  #y_type = data_type_converter(data.dtypes[y])
 
   line_color = 'steelblue'
   
   layers = {"fg":alt.Chart(data).mark_line().encode(
-    alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False)),
-    alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False)),
+    alt.X(field=x, scale=alt.Scale(zero=False)),
+    alt.Y(field=y, scale=alt.Scale(zero=False)),
   ),
   "bg":alt.Chart(data).mark_line(color='lightgray').encode(
-    alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False)),
-    alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False)),
+    alt.X(field=x, scale=alt.Scale(zero=False)),
+    alt.Y(field=y, scale=alt.Scale(zero=False)),
   )}
   
 
@@ -74,11 +74,11 @@ def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=None,yAxis=a
 
   
   layers = {"fg":alt.Chart(data).mark_circle().encode(
-      alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
-      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
+      alt.X(field=x, scale=alt.Scale(zero=False),axis=xAxis),
+      alt.Y(field=y, scale=alt.Scale(zero=False),axis=yAxis),
   ),"bg":alt.Chart(data).mark_circle(color='lightgray').encode(
-      alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
-      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
+      alt.X(field=x, scale=alt.Scale(zero=False),axis=xAxis),
+      alt.Y(field=y, scale=alt.Scale(zero=False),axis=yAxis),
   )} 
 
   if color:

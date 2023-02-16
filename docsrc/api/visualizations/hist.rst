@@ -38,16 +38,7 @@ effects : :ref:`effects-object`
 
 Examples
 **********************
-Interactive Point
-^^^^^^^^^^^^^^^^^^^^^^
-.. altair-plot::
 
-    import altair_express as alx
-    from vega_datasets import data
-    df = data.cars()
-
-    alx.highlight_point()+alx.hist(df,x='Horsepower')
-    
 Interactive Brush
 ^^^^^^^^^^^^^^^^^^^^^^
 .. altair-plot::
@@ -57,3 +48,15 @@ Interactive Brush
     df = data.cars()
 
     alx.highlight_brush()+alx.hist(df,x='Horsepower')
+
+    
+Split by color  
+^^^^^^^^^^^^^^^^^^^^^^
+.. altair-plot::
+
+    import altair_express as alx
+    from vega_datasets import data
+    df = data.cars()
+
+    alx.hist(df,x='Horsepower',color='Origin', max_bins=25)
+

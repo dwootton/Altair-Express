@@ -131,11 +131,12 @@ def get_field_from_encoding(chart,axis):
 
     return get_field_from_unit_encoding(chart,axis)
 
-def data_type_converter(data_type):
+def data_type_converter_old(data_type):
+  print(data_type)
   #TODO: add ordinal/maybe geojson
   if data_type == np.dtype('datetime64[ns]'):
     return 'T'#temporal
-  elif data_type == np.int64 or data_type == np.float64:
+  elif data_type == 'Int64' or data_type == np.float64:
     return 'Q'#quantitative
   elif data_type == np.string_ or data_type == np.object0:
     return 'N'#nominal
@@ -143,7 +144,34 @@ def data_type_converter(data_type):
     raise ValueError('[data_type_converter] data_type ' + str(data_type) + ' is not mappable to a vl datatype')
 
 
+def data_type_converter(typ):
+   
 
+    if typ in [
+        "floating",
+        "mixed-integer-float",
+        "integer",
+        "mixed-integer",
+        "complex",
+        "float64"
+    ]:
+        return "Q"
+    elif typ in ["string", "bytes", "categorical", "boolean", "mixed", "unicode"]:
+        return "N"
+    elif typ in [
+        "datetime",
+        "datetime64",
+        "timedelta",
+        "timedelta64",
+        "datetime64[ns]",
+        "date",
+        "time",
+        "period",
+    ]:
+        return "T"
+    else:
+      
+        return "N"
 
 def create_dataframe(data=None, *, x=None, y=None):
   # create data if x and y are pandas series

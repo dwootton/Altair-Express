@@ -22,18 +22,15 @@ def add_cursor_to_mark(unit_chart,cursor_type):
     
     return unit_chart
 
-def recursively_add_to_mark(chart,cursor_type):
-    if hasattr(chart,'mark') :
-        chart = add_cursor_to_mark(chart,cursor_type)
 
-# todo fix this, to not add click pointer to background 
+
+
     
-    if  cursor_type != "pointer" and (hasattr(chart,'mark') or hasattr(chart,'layer')):
-        chart.view = {
-            "cursor":cursor_type,
-            "stroke":None
-        }
-        return chart
+
+def recursively_add_to_mark(chart,functions_to_call):
+    for function in functions_to_call:
+       chart = function(chart)
+
 
     attributes_for_recursion = ['layer','hconcat','vconcat']
     for attribute in attributes_for_recursion:
@@ -41,7 +38,7 @@ def recursively_add_to_mark(chart,cursor_type):
         # instead, it should see if any exists, and if it does, it should use that as the item to search
         if alt_get(chart,attribute):
           for unit_spec in chart[attribute]:
-              unit_spec = recursively_add_to_mark(unit_spec,cursor_type)
+              unit_spec = recursively_add_to_mark(unit_spec,functions_to_call)
  
     return chart
 
@@ -81,8 +78,20 @@ def create_selection(chart,interaction):
     # check if any axis is aggregate
     
     if interaction.action['trigger'] == "drag":
-        encodings =  ['x','y'] # by default
-        encodings = [encoding for encoding in encodings if not check_axis_aggregate(chart,encoding)]
+        x_is_aggregate = check_axis_aggregate(chart,'x') 
+        y_is_aggregate = check_axis_aggregate(chart,'y')
+            
+        x_field = get_field_from_encoding(chart,'x')
+        y_field = get_field_from_encoding(chart,'y')
+
+        x_is_meaningful = x_field and 'level' not in x_field and not x_is_aggregate
+        y_is_meaningful = y_field and 'level' not in y_field and not y_is_aggregate
+
+        encodings =  [] # by default
+        if x_is_meaningful :
+            encodings.append('x')
+        if y_is_meaningful:
+            encodings.append('y')
 
         # if it is a line chart without additional encodings options, use x
         has_options = getattr(interaction,'options',None) != None
@@ -103,21 +112,26 @@ def create_selection(chart,interaction):
             field = get_field_from_encoding(chart,interaction.action['target'])
             selection=alt.selection_point(name=name, encodings=[interaction.action['target']], fields=[field])
         else: 
-            x_is_aggregate = check_axis_aggregate(chart,'x')
+            x_is_aggregate = check_axis_aggregate(chart,'x') 
             y_is_aggregate = check_axis_aggregate(chart,'y')
 
             fields = []
             if get_field_from_encoding(chart,'column'):
                 fields = [get_field_from_encoding(chart,'column')]
             
+            x_field = get_field_from_encoding(chart,'x')
+            y_field = get_field_from_encoding(chart,'y')
 
-            if  x_is_aggregate and not y_is_aggregate:
+            x_is_meaningful = x_field in chart.data.columns and not x_is_aggregate
+            y_is_meaningful = y_field in chart.data.columns and not y_is_aggregate
+            print('meaningn',x_is_meaningful,y_is_meaningful)
+            if  x_is_meaningful and not y_is_meaningful:
                 # if x is aggregated (ie is a count), then add y field to selection 
                 selection=alt.selection_point(name=name, encodings=['y'],fields=fields)
-            elif not  x_is_aggregate and  y_is_aggregate:
+            elif not  x_is_meaningful and  y_is_meaningful:
                 # if both of them are 
                 selection=alt.selection_point(name=name, encodings=['x'],fields=fields)
-            elif not x_is_aggregate and not y_is_aggregate:
+            elif not x_is_meaningful and not x_is_meaningful:
                 selection=alt.selection_point(name=name, encodings=['x','y'],fields=fields)
 
     if interaction.action['trigger'] == "type":
@@ -134,6 +148,9 @@ def create_selection(chart,interaction):
         name = ALX_SELECTION_PREFIX+'panzoom'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
         selection = alt.selection_interval(name=name,bind="scales", encodings=encodings)
     
+    if interaction.action['trigger'] == "mouseover":
+        selection = alt.selection_point( nearest=True, on='mouseover',clear= "mouseout", empty=False)
+
     return selection 
 
 def add_colors(chart,data,field,legend=alt.Legend()):
@@ -173,9 +190,20 @@ def apply_effect(chart,interaction,selection):
     return chart
 
 def add_tooltip_chart(chart,interaction,selection):
-    if interaction.action['trigger'] == "click":
-        chart = chart.add_selection(selection)
-        chart = chart.encode(tooltip=interaction.action['target'])
+    if interaction.action['trigger'] == "mouseover":
+        
+        def add_tooltip_to_mark(chart):
+            tooltip = {"content": "data"}
+            
+            if isinstance(chart.mark,str):
+                mark_type = chart.mark
+                chart.mark = alt.MarkDef(type=mark_type,tooltip=tooltip)
+            else: 
+                chart.mark.tooltip = tooltip
+            
+            return chart
+
+        recursively_add_to_mark(chart,[add_tooltip_to_mark])
     return chart
 
 
@@ -369,6 +397,7 @@ def highlight_chart(chart,interaction,selection):
 
     x_binned = check_axis_binned(chart,'x')
     y_binned = check_axis_binned(chart,'y')
+
     is_line = check_if_line(chart)
 
     if  is_line:
@@ -522,6 +551,18 @@ def process_effects(chart,effects):
       chart = process_highlights(chart,effects['highlight'])
     elif 'group' in effects:
       chart = process_groups(chart,effects['group'])
+    elif 'tooltip' in effects:
+      chart = process_tooltip(chart,effects['tooltip'])
+
+    return chart
+
+def process_tooltip(chart,tooltip):
+    if isinstance(tooltip, Interaction):
+        parameter = tooltip.get_selection()
+        if parameter is None:
+            parameter = create_selection(chart,tooltip)
+        chart = apply_effect(chart,tooltip,parameter)
+    
     return chart
 
 def process_highlights(chart,highlights):
@@ -565,14 +606,42 @@ def process_groups(chart,groups):
   return chart
 def add_cursor(chart,interaction):
     if interaction.action['trigger'] == "drag":
-        chart = recursively_add_to_mark(chart,'crosshair')
+        def add_crosshair(chart):
+            if hasattr(chart,'mark') :
+                return add_cursor_to_mark(chart,'crosshair')
+            return chart
+        def add_cross_to_view(chart):
+            if  (hasattr(chart,'mark') or hasattr(chart,'layer')):
+                chart.view = {
+                    "cursor":'crosshair',
+                    "stroke":None
+                }
+            return chart
+        chart = recursively_add_to_mark(chart,[add_crosshair,add_cross_to_view])
 
         #chart.view ={"cursor":"crosshair","stroke":None}
     if interaction.action['trigger'] == "click":
-        chart = recursively_add_to_mark(chart,'pointer')
+        def add_pointer(chart):
+            if hasattr(chart,'mark') :
+
+                return add_cursor_to_mark(chart,'pointer')
+            return chart
+        
+        chart = recursively_add_to_mark(chart,[add_pointer])
     if interaction.action['trigger'] == "panzoom":
-        chart = recursively_add_to_mark(chart,'move')
-        #chart.view ={"cursor":"move"}
+        def add_move(chart):
+            if hasattr(chart,'mark') :
+                return add_cursor_to_mark(chart,'move')
+            return chart
+        
+        def add_move_to_view(chart):
+            if  (hasattr(chart,'mark') or hasattr(chart,'layer')):
+                chart.view = {
+                    "cursor":'move',
+                    "stroke":None
+                }
+            return chart
+        chart = recursively_add_to_mark(chart,[add_move,add_move_to_view])
     return chart
 
 def add_interaction(chart, interaction):
