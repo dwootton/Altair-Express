@@ -1,76 +1,52 @@
-.. _visualization-typology:
+.. _visualizations:
 
 ============
-Visualization Typology
+Visualizations 
 =================================
 
 
+:ref:`jointplot` 
 
+.. image:: ../_static/example_thumbs/jointplot.png
+   :width: 300
 
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| Visualization Name  | Image                                               | Analytical Use             |   |
-+=====================+=====================================================+============================+===+
-| :ref:`jointplot`    | .. image:: ../_static/example_thumbs/jointplot.png  | Distribution, Correlation  |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`pairplot`     | .. image:: ../_static/example_thumbs/pairplot.png  | Distribution, Correlation  |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`lineplot`     | .. image:: ../_static/example_thumbs/lineplot.png  | Change over interval       |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`hist`         | .. image:: ../_static/example_thumbs/hist.png  | Numerical Distribution     |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`countplot`    | .. image:: ../_static/example_thumbs/countplot.png  | Categorical Distribution   |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`scatterplot`  | .. image:: ../_static/example_thumbs/jointplot.png  | Distribution   |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`heatmap`      | .. image:: ../_static/example_thumbs/jointplot.png  | Other                      |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-| :ref:`barplot`      | .. image:: ../_static/example_thumbs/jointplot.png  | Other                      |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-|  :ref:                   |                                                     |                            |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-|                     |                                                     |                            |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-|                     |                                                     |                            |   |
-+---------------------+-----------------------------------------------------+----------------------------+---+
-
-:ref:`jointplot`  
 
 
 :ref:`pairplot`
 
+.. image:: ../_static/example_thumbs/pairplot.png
+   :width: 300
 
-:ref:`lineplot`    
+
+
+:ref:`lineplot`   
+
+.. image:: ../_static/example_thumbs/lineplot.png
+   :width: 300
+
 
 
 :ref:`hist`  
 
+.. image:: ../_static/example_thumbs/hist.png
+   :width: 300
+
+
 
 :ref:`countplot`  
 
-:ref:`barplot`  
+.. image:: ../_static/example_thumbs/countplot.png
+   :width: 300
 
-:ref:`heatmap`
+
+:ref:`heatmap`	
+
+.. image:: ../_static/example_thumbs/heatmap.png
+   :width: 300
 
 
-:ref:`barplot`
-.. |logo| image:: ../_static/example_thumbs/jointplot.png
-   :width: 20pt
-   :height: 20pt
+:ref:`barplot`	
 
-+---------------------+--------+---------------------------+
-| Visualization Name  | Image  | Analytical Use            |
-+=====================+========+===========================+
-| :ref:`jointplot`    | |logo| | Distribution, Correlation |
-+---------------------+--------+---------------------------+
-| :ref:`pairplot`     | |logo| | Distribution, Correlation |
-+---------------------+--------+---------------------------+
-| :ref:`lineplot`     | |logo| | Change over interval      |
-+---------------------+--------+---------------------------+
-| :ref:`hist`         | |logo| | Numerical Distribution    |
-+---------------------+--------+---------------------------+
-| :ref:`countplot`    | |logo| | Categorical Distribution  |
-+---------------------+--------+---------------------------+
-| :ref:`heatmap`      | |logo| | Other                     |
-+---------------------+--------+---------------------------+
-| :ref:`barplot`      | |logo| | Other                     |
-+---------------------+--------+---------------------------+
+.. image:: ../_static/example_thumbs/barplot.png
+   :width: 300
+ 

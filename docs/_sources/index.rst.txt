@@ -18,5 +18,5 @@ specification affects analysis patterns.
     :maxdepth: 2
 
     Interactions <API/interactiontechniques>
-    Visualizations <API/visualizationtypology>
+    Visualizations <API/visualizations>
 

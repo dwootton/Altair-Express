@@ -350,6 +350,7 @@ def group_chart(chart,interaction,selection):
                   interaction_overlay=interaction_overlay.mark_line(strokeWidth= 8, stroke="transparent")
                 else:
                   # TODO: fix this, breaking double line chart overview+detail
+                  properties = {}
                   properties['strokeWidth'] = 8
                   properties['stroke'] = "transparent"
                   interaction_overlay=interaction_overlay.mark_line(**properties)

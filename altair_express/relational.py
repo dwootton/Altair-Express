@@ -57,17 +57,11 @@ def barplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color=
 def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color=None,effects=None,width=200,height=200):
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
-  x_shorthand = generate_shorthand(x,data)
-  y_shorthand = generate_shorthand(y,data)
-
   fill = 'steelblue'
-
-  
-
   
   chart = alt.Chart(data).mark_line(fill=fill).encode(
-    alt.X(shorthand=x_shorthand, scale=alt.Scale(zero=False),axis=x_axis),
-    alt.Y(shorthand=y_shorthand, scale=alt.Scale(zero=False),axis=y_axis),
+    alt.X(x, scale=alt.Scale(zero=False),axis=x_axis),
+    alt.Y(y, scale=alt.Scale(zero=False),axis=y_axis),
   )
 
   if color:
