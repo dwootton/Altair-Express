@@ -14,7 +14,7 @@ Interaction Techniques
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| :ref:`filter-color`   | alx.filter_color()     | query           | implemented  |
+| :ref:`highlight-color`   | alx.highlight_color()     | query           | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-brush`| alx.highlight_brush()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+

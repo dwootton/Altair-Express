@@ -122,13 +122,17 @@ def create_selection(chart,interaction):
             x_field = get_field_from_encoding(chart,'x')
             y_field = get_field_from_encoding(chart,'y')
 
-            x_is_meaningful = x_field in chart.data.columns and not x_is_aggregate
-            y_is_meaningful = y_field in chart.data.columns and not y_is_aggregate
+            x_is_meaningful = x_field and 'level' not in x_field and not x_is_aggregate
+            y_is_meaningful = y_field and 'level' not in y_field and not y_is_aggregate
+            
             if  x_is_meaningful and not y_is_meaningful:
+                fields.append(x_field)
                 # if x is aggregated (ie is a count), then add y field to selection 
                 selection=alt.selection_point(name=name, encodings=['y'],fields=fields)
             elif not  x_is_meaningful and  y_is_meaningful:
                 # if both of them are 
+                fields.append(y_field)
+
                 selection=alt.selection_point(name=name, encodings=['x'],fields=fields)
             elif not x_is_meaningful and not x_is_meaningful:
                 selection=alt.selection_point(name=name, encodings=['x','y'],fields=fields)
@@ -179,6 +183,7 @@ def add_colors(chart,data,field,legend=alt.Legend()):
 def apply_effect(chart,interaction,selection):
     attributes_for_recursion = ['layer','hconcat','vconcat']
 
+
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
 
@@ -218,9 +223,11 @@ def apply_effect_recurse(previous_chart,interaction,selection):
     chart = previous_chart.copy(deep=True)
     # alter the chart object to allow for interaction
     # apply the transform 
-
+    print('in apply effect recurse')
     # if chart is a facet, apply effect to the spec and then return the chart
     if alt_get(chart,'spec'):
+        print('in spec')
+
         copied_chart = chart.spec.copy(deep=True)
   
         copied_chart.data = chart.data
@@ -235,8 +242,9 @@ def apply_effect_recurse(previous_chart,interaction,selection):
         # if no encodings exist, 
     
     if interaction.effect['transform'] == "highlight":
+        print('in highlight')
         chart = highlight_chart(chart,interaction,selection)
-    
+        print('passed success chart')
     if interaction.effect['transform'] == "group":
         chart = group_chart(chart,interaction,selection)
         
@@ -345,6 +353,7 @@ def group_chart(chart,interaction,selection):
                 if isinstance(properties,str):
                   interaction_overlay=interaction_overlay.mark_line(strokeWidth= 8, stroke="transparent")
                 else:
+                  # TODO: fix this, breaking double line chart overview+detail
                   properties['strokeWidth'] = 8
                   properties['stroke'] = "transparent"
                   interaction_overlay=interaction_overlay.mark_line(**properties)
@@ -417,6 +426,8 @@ def highlight_chart(chart,interaction,selection):
     is_line = check_if_line(chart)
 
     if  is_line:
+        print(' in line')
+
         # for line charts, create a new layer with a color scale that maps to light gray
         color = get_field_from_encoding(chart,'color')      
 
@@ -449,9 +460,9 @@ def highlight_chart(chart,interaction,selection):
             chart.layer[1].transform.insert(0,filter_transform)
         else:
             chart.layer[1].transform = [filter_transform]
-
     elif (not x_agg and not y_agg) and (not x_binned and not y_binned) :
         # non-binned charts ()
+        print(' in non binned')
 
         # if the chart already has a color encoding, use that as a conditional
         highlight = get_field_from_encoding(chart,'color') or alt.value('steelblue')
@@ -467,13 +478,17 @@ def highlight_chart(chart,interaction,selection):
         chart = add_encoding(chart,color)
         
     else:
+        print(' in else')
 
         # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
         #chart.encoding.color.scale=alt.Scale(scheme='greys')
+        print(' past color_encoding')
+
         chart.encoding.color = alt.value('lightgray')
         chart = chart + chart 
         chart.layer[1].encoding.color = color_encoding
+        print(' past change color')
 
         filter_transform = alt.FilterTransform({"param": selection.name})
 
@@ -483,6 +498,8 @@ def highlight_chart(chart,interaction,selection):
             chart.layer[1].transform.insert(0,filter_transform)
         else:
             chart.layer[1].transform = [filter_transform]
+        print(' past transform')
+
     return chart 
 
 
@@ -566,7 +583,9 @@ def process_effects(chart,effects):
     if 'filter' in effects:
       chart = process_filters(chart,effects['filter'])
     elif 'highlight' in effects:
+      print('in highlight')
       chart = process_highlights(chart,effects['highlight'])
+      print('passed highlight')
     elif 'group' in effects:
       chart = process_groups(chart,effects['group'])
     elif 'tooltip' in effects:
@@ -590,6 +609,7 @@ def process_highlights(chart,highlights):
   for highlight in highlights:
       if isinstance(highlight, Interaction):
           parameter = highlight.get_selection()
+          print(parameter)
           if parameter is None:
               parameter = create_selection(chart,highlight)
 
@@ -667,12 +687,11 @@ def add_interaction(chart, interaction):
     parameter = create_selection(chart,interaction)
     interaction.set_selection(parameter)
     # spec charts need param added to the spec itself, otherwise you get duplicate signals
-    if chart.spec:
-        print('in add parms to spec')
+    print(chart,dir(chart),alt_get(chart,'spec'))
+    if alt_get(chart,'spec'):
         spec = chart.spec
         spec = spec.add_params(parameter)
         chart.spec = spec
-        print(chart.spec.params)
     else:
         chart=chart.add_params(parameter)
     chart =  apply_effect(chart,interaction,parameter)

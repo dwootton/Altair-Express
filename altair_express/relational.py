@@ -62,11 +62,7 @@ def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color
 
   fill = 'steelblue'
 
-  if color:
-    if color not in data.columns:
-        fill = color
-    else:
-        chart=chart.encode(alt.Color(field=color,scale=alt.Scale()))
+  
 
   
   chart = alt.Chart(data).mark_line(fill=fill).encode(
@@ -74,6 +70,11 @@ def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color
     alt.Y(shorthand=y_shorthand, scale=alt.Scale(zero=False),axis=y_axis),
   )
 
+  if color:
+    if color not in data.columns:
+        fill = color
+    else:
+        chart=chart.encode(alt.Color(field=color,scale=alt.Scale()))
   
   if effects:
     chart = process_effects(chart,effects)

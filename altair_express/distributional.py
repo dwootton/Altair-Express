@@ -134,7 +134,7 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descendin
 
   sort_order =  '-y' if sort=='descending' else 'y'
   chart = alt.Chart(data).mark_bar().encode(
-      alt.X(f'{x}:N',axis=xAxis,sort=sort_order), # remove the sort as that will keep it consistent with the background
+      alt.X(field=f'{x}',axis=xAxis,sort=sort_order), # remove the sort as that will keep it consistent with the background
       alt.Y(f'count({x}):Q',axis=yAxis)
   )
    

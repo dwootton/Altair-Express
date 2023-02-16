@@ -15,11 +15,3 @@ Through highlighting data within your brush, you can focus your analysis on the 
 
 
     alx.highlight_brush() + alx.scatterplot(data=data.cars(),x='Horsepower',y='Miles_per_Gallon')
-
-.. altair-plot::
-
-    import altair_express as alx
-    from vega_datasets import data
-
-
-    alx.highlight_brush() + alx.countplot(data=data.cars(),x='Origin')

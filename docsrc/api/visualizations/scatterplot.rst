@@ -17,8 +17,8 @@ making it easy to identify patterns and correlations in the data.
 
 Parameters
 **********************
-data : pandas dataframe or pandas series
-    The data to visualize as a pandas dataframe. If a series is provided, the series is used as the variable to be encoded in a histogram.
+data : pandas dataframe
+    The data to visualize as a pandas dataframe.
 x : string
     The column name of the data to be on the x-axis.
 y : string

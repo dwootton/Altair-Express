@@ -47,7 +47,7 @@ Interactive Brush
     from vega_datasets import data
     df = data.cars()
 
-    alx.highlight_brush()+alx.hist(df,x='Horsepower')
+    #alx.highlight_brush()+alx.hist(df,x='Horsepower')
 
     
 Split by color  

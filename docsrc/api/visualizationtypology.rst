@@ -53,3 +53,24 @@ Visualization Typology
 
 
 :ref:`barplot`
+.. |logo| image:: ../_static/example_thumbs/jointplot.png
+   :width: 20pt
+   :height: 20pt
+
++---------------------+--------+---------------------------+
+| Visualization Name  | Image  | Analytical Use            |
++=====================+========+===========================+
+| :ref:`jointplot`    | |logo| | Distribution, Correlation |
++---------------------+--------+---------------------------+
+| :ref:`pairplot`     | |logo| | Distribution, Correlation |
++---------------------+--------+---------------------------+
+| :ref:`lineplot`     | |logo| | Change over interval      |
++---------------------+--------+---------------------------+
+| :ref:`hist`         | |logo| | Numerical Distribution    |
++---------------------+--------+---------------------------+
+| :ref:`countplot`    | |logo| | Categorical Distribution  |
++---------------------+--------+---------------------------+
+| :ref:`heatmap`      | |logo| | Other                     |
++---------------------+--------+---------------------------+
+| :ref:`barplot`      | |logo| | Other                     |
++---------------------+--------+---------------------------+

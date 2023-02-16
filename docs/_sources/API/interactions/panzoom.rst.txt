@@ -12,5 +12,5 @@ These can be useful interactions for exploring and analyzing data, particularly 
     import altair_express as alx
     from vega_datasets import data
 
-    alx.panzoom() + alx.scatterplot(data=data.cars(),x='Miles_per_Gallon',y='Horsepower')
+    alx.pan_zoom() + alx.scatterplot(data=data.cars(),x='Miles_per_Gallon',y='Horsepower')
 
