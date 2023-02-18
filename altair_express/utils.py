@@ -83,6 +83,9 @@ def check_axis_binned(chart,axis):
 
 
 def check_axis_aggregate(chart,axis):
+    """
+    Checks if an axis is aggregate, and if it is, returns True, else False
+    """
     is_aggregate = is_axis_aggregate(chart,axis)
     
     attributes_for_recursion = ['layer','hconcat','vconcat','spec']

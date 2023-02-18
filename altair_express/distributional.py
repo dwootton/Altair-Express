@@ -57,6 +57,31 @@ def hist(data=None,x=None,color=None, max_bins=10,width=200,height=50,effects=No
           height=height
       )
 
+def stripplot(data=None,x=None,row=None,color=None,facet_params={},width=200,height=50,effects=None,y_axis =alt.Axis(values=[0], ticks=True, grid=False, labels=False),x_axis=alt.Axis()):
+ 
+    chart = alt.Chart(data,width=width,
+          height=height).mark_circle(size=8).encode(
+      y=alt.Y(
+          'jitter:Q',
+          title=None,
+          axis=y_axis,
+          #scale=alt.Scale(),
+      ),
+      x=alt.X(x,axis=x_axis),
+          ).transform_calculate(
+            # Generate Gaussian jitter with a Box-Muller transform
+            jitter='sqrt(-2*log(random()))*cos(2*PI*random())'
+        )                  
+    if color:
+      chart = chart.encode(color=alt.Color(color))
+
+    if row:
+        chart = chart.facet(row=row,**facet_params)
+   
+    if effects:
+      chart = process_effects(chart,effects)
+
+    return chart
 
 def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True),interactive=False,filters=None):
   if filters is None:

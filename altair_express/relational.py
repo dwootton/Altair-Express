@@ -61,7 +61,7 @@ def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color
     alt.X(x, scale=alt.Scale(zero=False),axis=x_axis),
     alt.Y(y, scale=alt.Scale(zero=False),axis=y_axis),
   )
-  
+
   if color:
     if color not in data.columns:
         fill = color
@@ -100,17 +100,14 @@ def kdeplot(data=None,x=None,color=None,effects=None,width=200,height=200):
 
   return chart
 
-def scatterplot(data=None, *, x=None, y=None,xAxis=alt.Axis(),color=None,yAxis=alt.Axis(),effects=None,fill="steelblue",width=200,height=200):
+def scatterplot(data=None, *, x=None, y=None,x_axis=alt.Axis(),color=None,y_axis=alt.Axis(),effects=None,fill="steelblue",width=200,height=200):
 
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
-  x_type = data_type_converter(data.dtypes[x])
-  y_type = data_type_converter(data.dtypes[y])
-
   
   chart = alt.Chart(data).mark_circle().encode(
-      alt.X(shorthand=f'{x}:{x_type}', scale=alt.Scale(zero=False),axis=xAxis),
-      alt.Y(shorthand=f'{y}:{y_type}', scale=alt.Scale(zero=False),axis=yAxis),
+      alt.X(x, scale=alt.Scale(zero=False),axis=x_axis),
+      alt.Y(y, scale=alt.Scale(zero=False),axis=y_axis),
   )
 
   if color:

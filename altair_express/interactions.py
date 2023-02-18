@@ -71,21 +71,25 @@ def check_if_line(chart):
                 return True
     return False
 
+def is_encoding_meaningful(chart,encoding):
+    encoding_is_aggregate = check_axis_aggregate(chart,encoding) 
 
+    encoding_field = get_field_from_encoding(chart,encoding)
+
+    RESERVED_ALX_NAMES = ['level','jitter']
+
+    field_is_calculated = encoding_field and any(encoding_field in s for s in RESERVED_ALX_NAMES)
+
+    return not encoding_is_aggregate and not field_is_calculated
 def create_selection(chart,interaction):
     selection = None
     # only allow selection on an axis if it is meaningful (ie data encoded, not 'count')
     # check if any axis is aggregate
     
     if interaction.action['trigger'] == "drag":
-        x_is_aggregate = check_axis_aggregate(chart,'x') 
-        y_is_aggregate = check_axis_aggregate(chart,'y')
-            
-        x_field = get_field_from_encoding(chart,'x')
-        y_field = get_field_from_encoding(chart,'y')
-
-        x_is_meaningful = x_field and 'level' not in x_field and not x_is_aggregate
-        y_is_meaningful = y_field and 'level' not in y_field and not y_is_aggregate
+        x_is_meaningful = is_encoding_meaningful(chart,'x')
+        y_is_meaningful = is_encoding_meaningful(chart,'y')
+        
 
         encodings =  [] # by default
         if x_is_meaningful :
@@ -121,9 +125,9 @@ def create_selection(chart,interaction):
             
             x_field = get_field_from_encoding(chart,'x')
             y_field = get_field_from_encoding(chart,'y')
-
-            x_is_meaningful = x_field and 'level' not in x_field and not x_is_aggregate
-            y_is_meaningful = y_field and 'level' not in y_field and not y_is_aggregate
+            RESERVED_ALX_NAMES = ['level','jitter']
+            x_is_meaningful = x_field and not any(x_field in s for s in RESERVED_ALX_NAMES) and not x_is_aggregate
+            y_is_meaningful = y_field and not any(y_field in s for s in RESERVED_ALX_NAMES) and not y_is_aggregate
             
             if  x_is_meaningful and not y_is_meaningful:
                 fields.append(x_field)
@@ -231,6 +235,11 @@ def apply_effect_recurse(previous_chart,interaction,selection):
         copied_chart.data = chart.data
         
         chart.spec = apply_effect_recurse(copied_chart,interaction,selection)
+        # if there is a dataset already in existance, use that
+        if chart.spec.data is not None and chart.data is not None :
+            
+            chart.spec.data = alt.Undefined
+
         return chart
 
     
