@@ -13,10 +13,10 @@ def jointplot(data=None,x=None, y=None,effects=None,width=200,height=200):
         A string indicating the name of the person.
   """
    
-  top = hist(data=data,x=x,width=200,height=50,xAxis=None,yAxis=None)
-  right = hist(data=data,y=y,width=50,height=200,xAxis=None,yAxis=None)
+  top = hist(data=data,x=x,width=200,height=50,x_axis=None,y_axis=None)
 
-  mid = scatterplot(data=data,x=x,y=y)
+  right = hist(data=data,y=y,width=50,height=200,x_axis=None,y_axis=None)
+  mid = scatterplot(data=data,x=x,y=y, width = width,height=height)
 
 
   # question is there a way to 
@@ -25,4 +25,4 @@ def jointplot(data=None,x=None, y=None,effects=None,width=200,height=200):
   if effects:
     chart = process_effects(chart,effects)
 
-  return chart.properties(width=width,height=height)
+  return chart

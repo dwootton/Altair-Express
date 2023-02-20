@@ -19,7 +19,6 @@ def is_axis_aggregate(chart,axis):
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:
-        print('encoding',encoding)
 
         axis_encode = ''
         if not is_undefined(encoding.field):
@@ -35,7 +34,6 @@ def is_axis_aggregate(chart,axis):
         encode_string = f'{axis_encode}' 
         for aggregation_name in AGGREGATION_NAMES:
             if re.search(r'\b'+aggregation_name+r'\b',encode_string):
-                print('str',encode_string,aggregation_name)
                 return True
         return False
     else: 
@@ -47,12 +45,8 @@ def is_axis_binned(chart,axis):
     
     encoding = chart.encoding[axis]
 
-    if encoding:
-        axis_encode = chart.to_dict()['encoding'].get(axis)
-        if axis_encode is None:
-            return False
-        else:
-          return axis_encode.get('bin')
+    if not is_undefined(encoding):
+        return encoding.bin is not None
     else: 
         return False
 
@@ -97,11 +91,9 @@ def check_axis_aggregate(chart,axis):
     Checks if an axis is aggregate, and if it is, returns True, else False
     """
     is_aggregate = is_axis_aggregate(chart,axis)
-    print('is agg',axis,is_aggregate)
     attributes_for_recursion = ['layer','hconcat','vconcat','spec']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
-          print('in layer',attribute,axis)
           # TODO, make this recursive instead of one layer deep
           if attribute == 'spec':
              return is_axis_aggregate(chart.spec,axis)
