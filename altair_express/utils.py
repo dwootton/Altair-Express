@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+import re
 import altair as alt
 
 def add_encoding(chart,color):
@@ -19,13 +19,23 @@ def is_axis_aggregate(chart,axis):
     AGGREGATION_NAMES = ["count","sum","distinct","missing","mean","average","variance","stdev"]
 
     if encoding:
-        axis_encode = encoding #chart.to_dict()['encoding'].get(axis)
+        print('encoding',encoding)
+
+        axis_encode = ''
+        if not is_undefined(encoding.field):
+            axis_encode += encoding.field
+        if not is_undefined(encoding.shorthand):
+            axis_encode += encoding.shorthand
+
+        
         if axis_encode is None:
             return False
         
-        encode_string = f'{axis_encode}'
+
+        encode_string = f'{axis_encode}' 
         for aggregation_name in AGGREGATION_NAMES:
-            if encode_string.find(aggregation_name) > -1:
+            if re.search(r'\b'+aggregation_name+r'\b',encode_string):
+                print('str',encode_string,aggregation_name)
                 return True
         return False
     else: 
@@ -87,10 +97,11 @@ def check_axis_aggregate(chart,axis):
     Checks if an axis is aggregate, and if it is, returns True, else False
     """
     is_aggregate = is_axis_aggregate(chart,axis)
-    
+    print('is agg',axis,is_aggregate)
     attributes_for_recursion = ['layer','hconcat','vconcat','spec']
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
+          print('in layer',attribute,axis)
           # TODO, make this recursive instead of one layer deep
           if attribute == 'spec':
              return is_axis_aggregate(chart.spec,axis)

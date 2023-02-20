@@ -74,12 +74,14 @@ def check_if_line(chart):
 
 def is_encoding_meaningful(chart,encoding):
     encoding_is_aggregate = check_axis_aggregate(chart,encoding) 
-
+    print(encoding,encoding_is_aggregate)
     encoding_field = get_field_from_encoding(chart,encoding)
+    print(encoding,encoding_field)
 
     RESERVED_ALX_NAMES = ['level','jitter']
 
     field_is_calculated = encoding_field and any(encoding_field in s for s in RESERVED_ALX_NAMES)
+    print(encoding,field_is_calculated)
 
     return not encoding_is_aggregate and not field_is_calculated
 def create_selection(chart,interaction):
@@ -93,6 +95,7 @@ def create_selection(chart,interaction):
         
 
         encodings =  [] # by default
+        print('x_is_meaningful',x_is_meaningful,'y_is_meaningful',y_is_meaningful)
         if x_is_meaningful :
             encodings.append('x')
         if y_is_meaningful:

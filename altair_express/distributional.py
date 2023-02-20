@@ -159,8 +159,9 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
   return final_chart
 
 
-def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descending', limit=15, effects=None,width=250,height=150):
+def countplot(data=None,x=None,x_axis=alt.Axis(),y_axis=alt.Axis(),sort=None, limit=15, effects=None,width=250,height=150):
   
+ 
 
   if data is None:
     if x is None:
@@ -170,12 +171,15 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descendin
       data['x'] = x
       x = 'x'
 
-  # if x 
+  if sort is None:
+    # sort in a descending order, 
+    # the sort must be specified with the columns because otherwise if interaction is present the categorical labels will change their counts. 
+    sort = alt.Sort(data[x].value_counts().index.tolist())
 
-  sort_order =  '-y' if sort=='descending' else 'y'
+
   chart = alt.Chart(data).mark_bar().encode(
-      alt.X(field=f'{x}',axis=xAxis,sort=sort_order), # remove the sort as that will keep it consistent with the background
-      alt.Y(f'count({x}):Q',axis=yAxis)
+      alt.X(field=f'{x}',axis=x_axis,sort=sort), # remove the sort as that will keep it consistent with the background
+      alt.Y(f'count({x}):Q',axis=y_axis)
   )
    
   if effects:

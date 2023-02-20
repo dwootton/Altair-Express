@@ -24,23 +24,24 @@ def generate_shorthand(input_field,data):
   return f'{input_field}:{data_type}'
 
 
-def barplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color=None,column=None,effects=None,width=200,height=200):
+def barplot(data=None, x=None, y=None,sort=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color=None,column=None,effects=None,width=500,height=200):
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
   params = {}
   facet_params = {}
   if color:
      params['color'] = color
-      
-  #if column:
-  #    facet_params['column'] = column
-  #    params['column'] = column
+
+
+  #if not sort:
+    #sort = alt.EncodingSortField(field=y, op="min")
+
   if column:
     num_facets = len(pd.unique(data[column]))
     width = width / num_facets
 
   chart = alt.Chart(data).mark_bar().encode(
-    alt.X(x,axis=x_axis),
+    alt.X(x,axis=x_axis,sort=sort),
     alt.Y(y,axis=y_axis),
     **params
   ).properties(width=width,height=height)
@@ -76,7 +77,7 @@ def dotplot(data=None,x=None,color=None,effects=None,width=200,height=200):
   # case where your data needs to be binned and aggregated
   # case where your data is already binned and you have a column for aggregated column
 
-  
+
 
   if effects:
     chart = process_effects(chart,effects)
