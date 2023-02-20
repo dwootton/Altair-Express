@@ -57,10 +57,19 @@ def hist(data=None,x=None,color=None, max_bins=10,width=200,height=50,effects=No
           height=height
       )
 
-def stripplot(data=None,x=None,row=None,color=None,facet_params={},width=200,height=50,effects=None,y_axis =alt.Axis(values=[0], ticks=True, grid=False, labels=False),x_axis=alt.Axis()):
+def stripplot(data=None,x=None,row=None,color=None, configure_facet=True, size=None,facet_params={},width=200,height=50,effects=None,y_axis =alt.Axis(values=[0], ticks=True, grid=False, labels=False),x_axis=alt.Axis()):
  
+    # dynamically set size of marks based on number of data points
+    if not size and len(data) > 1000:
+      size = 8
+    elif not size and len(data) > 100:
+      size = 40
+    elif not size:
+      size = 90
+    
+
     chart = alt.Chart(data,width=width,
-          height=height).mark_circle(size=8).encode(
+          height=height).mark_circle(size=size).encode(
       y=alt.Y(
           'jitter:Q',
           title=None,
@@ -81,6 +90,12 @@ def stripplot(data=None,x=None,row=None,color=None,facet_params={},width=200,hei
     if effects:
       chart = process_effects(chart,effects)
 
+    if configure_facet:
+      chart = chart.configure_facet(
+          spacing=0
+      ).configure_view(
+          stroke=None
+      )
     return chart
 
 def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=False, values=[0],grid=False, ticks=True),interactive=False,filters=None):
@@ -171,7 +186,6 @@ def countplot(data=None,x=None,xAxis=alt.Axis(),yAxis=alt.Axis(),sort='descendin
           width=width,
           height=height
       )
-
 
 def heatmap(data=None):
   if data is None:

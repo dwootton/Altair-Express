@@ -63,9 +63,8 @@ def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color
   )
 
   if color:
-    if color not in data.columns:
-        fill = color
-    else:
+    if color  in data.columns:
+  
         chart=chart.encode(alt.Color(field=color,scale=alt.Scale()))
   
   if effects:
@@ -73,6 +72,16 @@ def lineplot(data=None, x=None, y=None,y_axis=alt.Axis(),x_axis=alt.Axis(),color
 
   return chart.properties(width=width,height=height)
 
+def dotplot(data=None,x=None,color=None,effects=None,width=200,height=200):
+  # case where your data needs to be binned and aggregated
+  # case where your data is already binned and you have a column for aggregated column
+
+  
+
+  if effects:
+    chart = process_effects(chart,effects)
+
+  return chart
 def kdeplot(data=None,x=None,color=None,effects=None,width=200,height=200):
   x_shorthand = generate_shorthand(x,data)
 

@@ -47,7 +47,8 @@ ALX_SELECTION_SUFFIX= {
     "filter":"_FILTER",
     "scale_bind":"_FILTER",
     "highlight":"_FILTER",
-    "group":"_GROUP"
+    "group":"_GROUP",
+    "label":"_FILTER" # often used as a part of a filtering operation
 }
 
 def check_if_unit_line(chart):
@@ -113,8 +114,13 @@ def create_selection(chart,interaction):
         selection = alt.selection_point(name=name)
         
         if 'target' in interaction.action:
-            field = get_field_from_encoding(chart,interaction.action['target'])
-            selection=alt.selection_point(name=name, encodings=[interaction.action['target']], fields=[field])
+            # if target is a column, then use that as the field
+            if interaction.action['target'] in chart.data.columns:
+                selection=alt.selection_point(name=name,empty=True)
+            else:
+                field = get_field_from_encoding(chart,interaction.action['target'])
+                selection=alt.selection_point(name=name, encodings=[interaction.action['target']], fields=[field])
+            
         else: 
             x_is_aggregate = check_axis_aggregate(chart,'x') 
             y_is_aggregate = check_axis_aggregate(chart,'y')
@@ -141,6 +147,16 @@ def create_selection(chart,interaction):
             elif not x_is_meaningful and not x_is_meaningful:
                 selection=alt.selection_point(name=name, encodings=['x','y'],fields=fields)
 
+    if interaction.action['trigger'] == "slider":
+        name = ALX_SELECTION_PREFIX+'slider'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
+        field = interaction.action['target']
+        max = chart.data[field].max()
+        min = chart.data[field].min()
+        print("max",max,"min",min)
+        slider = alt.binding_range(min=min,max=max, name=f'{interaction.action["target"]}:')
+        selection = alt.selection_point(name=name, fields=[interaction.action['target']],
+                                        bind=slider)
+
     if interaction.action['trigger'] == "type":
         name = ALX_SELECTION_PREFIX+'query'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
 
@@ -166,7 +182,6 @@ def create_selection(chart,interaction):
             params['nearest'] = True
 
         selection = alt.selection_point(**params)
-
     return selection 
 
 def add_colors(chart,data,field,legend=alt.Legend()):
@@ -186,7 +201,6 @@ def add_colors(chart,data,field,legend=alt.Legend()):
 
 def apply_effect(chart,interaction,selection):
     attributes_for_recursion = ['layer','hconcat','vconcat']
-
 
     for attribute in attributes_for_recursion:
         if alt_get(chart,attribute):
@@ -247,7 +261,9 @@ def apply_effect_recurse(previous_chart,interaction,selection):
          chart = filter_chart(chart,interaction,selection)
                 
         # if no encodings exist, 
-    
+    if interaction.effect['transform'] == "label":
+        chart = label_chart(chart,interaction,selection)
+
     if interaction.effect['transform'] == "highlight":
         chart = highlight_chart(chart,interaction,selection)
     if interaction.effect['transform'] == "group":
@@ -260,6 +276,20 @@ def apply_effect_recurse(previous_chart,interaction,selection):
         chart = add_tooltip_chart(chart,interaction,selection)
         
     return chart
+
+def label_chart(chart,interaction,selection):
+    x_field = get_field_from_encoding(chart,'x')
+    y_field =  get_field_from_encoding(chart,'y')
+
+    labels = alt.Chart(chart.data).mark_text(align='left',baseline='middle',dx=5,dy=-5).encode(alt.Text('Name'),
+            alt.X(x_field),
+            alt.Y(y_field),
+        ).transform_filter(selection)
+    
+    chart = chart + labels
+    return chart
+    
+   
 
 
 
@@ -378,7 +408,7 @@ def group_chart(chart,interaction,selection):
     return chart
     
     
-    
+# for binding based interactions, you have to use transforms directly as the interaction is not a selection
     
 def filter_chart(chart,interaction,selection):
     filter_transform = alt.FilterTransform({"param": selection.name})
@@ -529,6 +559,7 @@ _filter = {"transform":"filter"} # _filter as to avoid overloading python's filt
 group = {"transform":"group"}
 scale_bind = {"transform":"scale_bind"}
 tooltip = {"transform":"tooltip"}
+label = {"transform":"label"}
 
 # Input Actions
 brush = {"trigger":"drag"}
@@ -565,6 +596,18 @@ def group_color():
 def pan_zoom(bind_x=True, bind_y=True):    
     return Interaction(effect=scale_bind,action={"trigger":"panzoom"},options={'bind_x':bind_x,'bind_y':bind_y})
 
+# slider functionality currently very limited, only selects the current value (not a predicate) 
+def filter_slider(field):
+    return Interaction(effect=_filter,action={"trigger":"slider","target":field})
+def highlight_slider(field):
+    return Interaction(effect=highlight,action={"trigger":"slider","target":field})
+
+# label functionality 
+def label_brush(field):
+    return Interaction(effect=label,action={"trigger":"drag","target":field})
+def label_point(field):
+    return Interaction(effect=label,action={"trigger":"click","target":field})
+
 def filter_type(target):
     action = { "trigger": "type", "target": target}
     return Interaction(effect=_filter,action=action)
@@ -588,7 +631,18 @@ def process_effects(chart,effects):
       chart = process_groups(chart,effects['group'])
     elif 'tooltip' in effects:
       chart = process_tooltip(chart,effects['tooltip'])
+    elif 'label' in effects:
+      chart = process_tooltip(chart,effects['tooltip'])
 
+    return chart
+
+def process_label(chart,label):
+    if isinstance(tooltip, Interaction):
+        parameter = tooltip.get_selection()
+        if parameter is None:
+            parameter = create_selection(chart,label)
+        chart = apply_effect(chart,label,parameter)
+    
     return chart
 
 def process_tooltip(chart,tooltip):
