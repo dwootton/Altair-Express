@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Interaction Techniques &#8212; Altair Express 0.1.24 documentation</title>
+    <title>Interaction Techniques &#8212; Altair Express 0.1.25 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -309,8 +309,73 @@
               
   <section id="interaction-techniques">
 <span id="id1"></span><h1>Interaction Techniques<a class="headerlink" href="#interaction-techniques" title="Permalink to this heading">#</a></h1>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Interaction Techniques</p></th>
+<th class="head" colspan="2"><p>Command              | Pandas Command</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="interactions/filterbrush.html#filter-brush"><span class="std std-ref">Filter Brush</span></a></p></td>
+<td><p>alx.filter_brush()</p></td>
+<td><p>query (filter)</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="interactions/filterpoint.html#filter-point"><span class="std std-ref">Filter Point</span></a></p></td>
+<td><p>alx.filter_point()</p></td>
+<td><p>query (filter)</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="interactions/filtertype.html#filter-type"><span class="std std-ref">Filter Type</span></a></p></td>
+<td><p>alx.filter_type()</p></td>
+<td><p>query (filter)</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="interactions/highlightcolor.html#highlight-color"><span class="std std-ref">Highlight Color</span></a></p></td>
+<td><p>alx.highlight_color()</p></td>
+<td><p>query</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="interactions/highlightbrush.html#highlight-brush"><span class="std std-ref">Highlight Brush</span></a></p></td>
+<td><p>alx.highlight_brush()</p></td>
+<td><p>query (filter)</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="interactions/highlightpoint.html#highlight-point"><span class="std std-ref">Highlight Point</span></a></p></td>
+<td><p>alx.highlight_point()</p></td>
+<td><p>query (filter)</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="interactions/grouppoint.html#group-point"><span class="std std-ref">Group Point</span></a></p></td>
+<td><p>alx.group_point()</p></td>
+<td><p>groupby</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="xref std std-ref">panzoom</span></p></td>
+<td><p>alx.panzoom()</p></td>
+<td><p>None</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="interactions/highlightcolor.html#highlight-color"><span class="std std-ref">Highlight Color</span></a></p></td>
+<td><p>alx.highlight_color()</p></td>
+<td><p>query (filter</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p>group_brush</p></td>
+<td><p>alx.group_brush()</p></td>
+<td><p>groupby</p></td>
+<td><p>in-progress</p></td>
+</tr>
+<tr class="row-even"><td><p>encode_axis</p></td>
+<td><p>alx.encode_axis()</p></td>
+<td><p>None</p></td>
+<td><p>in-progress</p></td>
+</tr>
+</tbody>
+</table>
 <p>The interaction typology is a set of interaction techniques that are helpful when
-using charts to explore data.  These interaction techniques can be layered ontop of charts
+using charts to explore data.  These interaction techniques can be now! layered ontop of charts
 by simply layering them on top like:</p>
 <div class="highlight-python notranslate" id="interactiontechniques-rst-altair-source-0"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">altair_express</span> <span class="k">as</span> <span class="nn">alx</span>
 <span class="kn">from</span> <span class="nn">vega_datasets</span> <span class="kn">import</span> <span class="n">data</span>

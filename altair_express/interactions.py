@@ -221,13 +221,14 @@ def add_tooltip_chart(chart,interaction,selection):
     if interaction.action['trigger'] == "mouseover":
         
         def add_tooltip_to_mark(chart):
-            tooltip = {"content": "data"}
-            
-            if isinstance(chart.mark,str):
-                mark_type = chart.mark
-                chart.mark = alt.MarkDef(type=mark_type,tooltip=tooltip)
-            else: 
-                chart.mark.tooltip = tooltip
+            if getattr(chart,'mark',None):
+                tooltip = {"content": "data"}
+                
+                if isinstance(chart.mark,str):
+                    mark_type = chart.mark
+                    chart.mark = alt.MarkDef(type=mark_type,tooltip=tooltip)
+                else: 
+                    chart.mark.tooltip = tooltip
             
             return chart
 
@@ -510,7 +511,6 @@ def highlight_chart(chart,interaction,selection):
         chart = add_encoding(chart,color)
         
     else:
-
         # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
         #chart.encoding.color.scale=alt.Scale(scheme='greys')

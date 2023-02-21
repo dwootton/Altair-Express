@@ -46,7 +46,7 @@ def is_axis_binned(chart,axis):
     encoding = chart.encoding[axis]
 
     if not is_undefined(encoding):
-        return encoding.bin is not None
+        return encoding.bin is not None and not is_undefined(encoding.bin)
     else: 
         return False
 
@@ -77,12 +77,13 @@ def recurse_through_units(chart,function,exitOnFirst = False):
                 return result
 def check_axis_binned(chart,axis):
     is_meaningful = is_axis_binned(chart,axis)
-    
-    # if a layered chart, 
-    if alt_get(chart,'layer'):
-        for layer in chart.layer:
-            if is_axis_binned(layer,axis):
-                return True
+
+    attributes_for_recursion = ['layer','spec']
+    for attribute in attributes_for_recursion:
+        if alt_get(chart,attribute):
+            for layer in chart[attribute]:
+                if is_axis_binned(layer,axis):
+                    return True
     return is_meaningful
 
 

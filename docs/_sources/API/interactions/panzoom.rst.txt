@@ -1,4 +1,4 @@
-.. s:
+.. _panzoom:
 
 ============
 Panzoom

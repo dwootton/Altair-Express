@@ -14,7 +14,7 @@ Interaction Techniques
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| :ref:`highlight-color`   | alx.highlight_color()     | query           | implemented  |
+| :ref:`highlight-color`| alx.highlight_color()  | query           | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-brush`| alx.highlight_brush()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
@@ -32,7 +32,7 @@ Interaction Techniques
 +-----------------------+------------------------+-----------------+--------------+
 
 The interaction typology is a set of interaction techniques that are helpful when 
-using charts to explore data.  These interaction techniques can be layered ontop of charts
+using charts to explore data.  These interaction techniques can be now! layered ontop of charts
 by simply layering them on top like:
 
 .. altair-plot::

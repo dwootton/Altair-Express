@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Filter Point &#8212; Altair Express 0.1.25 documentation</title>
+    <title>Stripplot &#8212; Altair Express 0.1.25 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -43,7 +43,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
     <script src="https://cdn.jsdelivr.net/gh/dwootton/vega-embed/build/vega-embed.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'API/interactions/filterpoint';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'API/visualizations/stripplot';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -305,26 +305,86 @@
             
             <article class="bd-article" role="main">
               
-  <section id="filter-point">
-<span id="id1"></span><h1>Filter Point<a class="headerlink" href="#filter-point" title="Permalink to this heading">#</a></h1>
-<p>The filter_point() function is a data filtering technique that allows you to filter your data visualization by selecting a specific point in the plot.
-This function removes all non-selected points from the chart (but keeps the axes consistent).
-This is particularly useful when investigating specific outliers or looking at a specific record of data.
-For multi-point selection, we recommend you use <a class="reference internal" href="highlightpoint.html#highlight-point"><span class="std std-ref">Highlight Point</span></a>.</p>
-<p>Note: if you’re using this to select marks separated by another encoding like ‘color’, you’ll need to use the <a class="reference internal" href="highlightcolor.html#highlight-color"><span class="std std-ref">Highlight Color</span></a> function.</p>
-<div class="highlight-python notranslate" id="filterpoint-rst-altair-source-0"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">altair_express</span> <span class="k">as</span> <span class="nn">alx</span>
-<span class="kn">from</span> <span class="nn">vega_datasets</span> <span class="kn">import</span> <span class="n">data</span>
+  <section id="stripplot">
+<span id="barplot"></span><h1>Stripplot<a class="headerlink" href="#stripplot" title="Permalink to this heading">#</a></h1>
+<div class="highlight-python notranslate" id="stripplot-rst-altair-source-0"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">altair_express</span> <span class="k">as</span> <span class="nn">alx</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="c1">#alx.filter_point() + alx.scatterplot(data=data.cars(),x=&#39;Horsepower&#39;,y=&#39;Miles_per_Gallon&#39;)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">seattle_temps</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">month_name</span><span class="p">()</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;month_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">month</span>
+
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">alx</span><span class="o">.</span><span class="n">stripplot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="s1">&#39;month_index&#39;</span><span class="p">)</span>
+
+<span class="n">chart</span><span class="o">.</span><span class="n">configure_facet</span><span class="p">(</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span><span class="o">.</span><span class="n">configure_view</span><span class="p">(</span>
+    <span class="n">stroke</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate" id="filterpoint-rst-altair-source-1"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">altair_express</span> <span class="k">as</span> <span class="nn">alx</span>
-<span class="kn">from</span> <span class="nn">vega_datasets</span> <span class="kn">import</span> <span class="n">data</span>
+<p>A strip plot is a function that shows the numeric distribution of data over categories.
+It draws a faceted scatter plot where each row is a value in categorical and one variable is numeric.
+Within a data series, the y axis is jittered so it is easier to understand a distribution of data.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">#</a></h2>
+<dl>
+<dt>data<span class="classifier">pandas dataframe or pandas series</span></dt><dd><p>The data to visualize as a pandas dataframe. If a series is provided, the series is used as the variable to be encoded in a histogram.</p>
+</dd>
+<dt>x<span class="classifier">string</span></dt><dd><p>The quantitative column name of the series for the x axis.</p>
+</dd>
+<dt>row<span class="classifier">string</span></dt><dd><p>The column name of the series for the y axis.</p>
+</dd>
+<dt>color<span class="classifier">string</span></dt><dd><p>A valid CSS color to make the chart or a column name in the dataframe to color the plots by.</p>
+</dd>
+<dt>row<span class="classifier">string</span></dt><dd><p>The column name to be used as the row facet to produced grouped</p>
+</dd>
+<dt>width<span class="classifier">int</span></dt><dd><p>The width of the chart in pixels.</p>
+</dd>
+<dt>height<span class="classifier">int</span></dt><dd><p>The height of the chart in pixels.</p>
+</dd>
+<dt>effects<span class="classifier"><a class="reference internal" href="../effectsobject.html#effects-object"><span class="std std-ref">Effect Objects</span></a></span></dt><dd><p>The effects of interactions to be applied to the chart.</p>
+</dd>
+</dl>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
+<section id="quantitative-brush">
+<h3>Quantitative Brush<a class="headerlink" href="#quantitative-brush" title="Permalink to this heading">#</a></h3>
+<div class="highlight-python notranslate" id="stripplot-rst-altair-source-1"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">altair_express</span> <span class="k">as</span> <span class="nn">alx</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">seattle_temps</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">month_name</span><span class="p">()</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;month_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">month</span>
 
 
-<span class="c1">#alx.filter_point() + alx.scatterplot(data=data.cars(),x=&#39;Horsepower&#39;,y=&#39;Miles_per_Gallon&#39;)</span>
+<span class="n">chart</span> <span class="o">=</span> <span class="n">alx</span><span class="o">.</span><span class="n">stripplot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="s1">&#39;month_index&#39;</span><span class="p">)</span>
+
+<span class="n">alx</span><span class="o">.</span><span class="n">highlight_brush</span><span class="p">()</span><span class="o">+</span><span class="n">chart</span><span class="o">.</span><span class="n">configure_facet</span><span class="p">(</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span><span class="o">.</span><span class="n">configure_view</span><span class="p">(</span>
+    <span class="n">stroke</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="selecting-specific-values">
+<h3>Selecting Specific Values<a class="headerlink" href="#selecting-specific-values" title="Permalink to this heading">#</a></h3>
+<div class="highlight-python notranslate" id="stripplot-rst-altair-source-2"><div class="highlight"><pre><span></span><span class="n">alx</span><span class="o">.</span><span class="n">highlight_color</span><span class="p">()</span><span class="o">+</span><span class="n">alx</span><span class="o">.</span><span class="n">stripplot</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">),</span><span class="n">width</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;month&#39;</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="s1">&#39;month_index&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">configure_facet</span><span class="p">(</span>
+<span class="n">spacing</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>).configure_view(</dt><dd><p>stroke=None</p>
+</dd>
+</dl>
+<p>)</p>
+</section>
+</section>
 </section>
 
 
@@ -344,6 +404,40 @@ For multi-point selection, we recommend you use <a class="reference internal" hr
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#parameters">
+   Parameters
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#examples">
+   Examples
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#quantitative-brush">
+     Quantitative Brush
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#selecting-specific-values">
+     Selecting Specific Values
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>
