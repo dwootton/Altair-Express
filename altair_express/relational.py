@@ -110,7 +110,7 @@ def kdeplot(data=None,x=None,color=None,effects=None,width=200,height=200):
 
   return chart
 
-def scatterplot(data=None, *, x=None, y=None,x_axis=alt.Axis(),color=None,y_axis=alt.Axis(),effects=None,fill="steelblue",width=200,height=200):
+def scatterplot(data=None, *, x=None, y=None,size=None,x_axis=alt.Axis(),color=None,y_axis=alt.Axis(),effects=None,fill="steelblue",width=200,height=200):
 
   data, x, y = create_dataframe(data=data,x=x,y=y)
 
@@ -119,6 +119,9 @@ def scatterplot(data=None, *, x=None, y=None,x_axis=alt.Axis(),color=None,y_axis
       alt.X(x, scale=alt.Scale(zero=False),axis=x_axis),
       alt.Y(y, scale=alt.Scale(zero=False),axis=y_axis),
   )
+
+  if size:
+    chart=chart.encode(alt.Size(size))
 
   if color:
     if color not in data.columns:

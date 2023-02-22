@@ -8,5 +8,5 @@ from .jointplot import *
 from .pairplot import *
 from .distributional import *
 from .relational import *
-from .data_table import *
+from .profile import *
 from .interactions import *

@@ -78,7 +78,7 @@ def is_encoding_meaningful(chart,encoding):
 
     RESERVED_ALX_NAMES = ['level','jitter']
 
-    field_is_calculated = encoding_field and any(encoding_field in s for s in RESERVED_ALX_NAMES)
+    field_is_calculated = encoding_field and any(s in encoding_field for s in RESERVED_ALX_NAMES)
 
     return not encoding_is_aggregate and not field_is_calculated
 def create_selection(chart,interaction):
@@ -151,8 +151,9 @@ def create_selection(chart,interaction):
         field = interaction.action['target']
         max = chart.data[field].max()
         min = chart.data[field].min()
-        slider = alt.binding_range(min=min,max=max, name=f'{interaction.action["target"]}:')
-        selection = alt.selection_point(name=name, fields=[interaction.action['target']],
+        step = chart.data[field].diff().dropna().unique()[0] or 1
+        slider = alt.binding_range(min=min,max=max,step=step, name=f'{interaction.action["target"]}:')
+        selection = alt.selection_point(name=name, value=min,fields=[interaction.action['target']],
                                         bind=slider)
 
     if interaction.action['trigger'] == "type":
@@ -223,6 +224,9 @@ def add_tooltip_chart(chart,interaction,selection):
         def add_tooltip_to_mark(chart):
             if getattr(chart,'mark',None):
                 tooltip = {"content": "data"}
+
+                if getattr(interaction.effect,'target',None):
+                    tooltip['field'] = interaction.effect.target
                 
                 if isinstance(chart.mark,str):
                     mark_type = chart.mark
@@ -427,16 +431,20 @@ def filter_chart(chart,interaction,selection):
         
     # for each encoding in selection 
     selection_type = getattr(selection.param,'select',{})
-    encodings = getattr(selection_type,'encodings',None) or ["x","y"] # default to x and y to maintain reference of chart
+    encodings_from_interaction = getattr(selection_type,'encodings',None)
+    change_scale = getattr(interaction.effect,"target","datum") == "extent" # if target is called out, use that. Otherwise target the data elements
+    encodings = encodings_from_interaction if (encodings_from_interaction and not is_undefined(encodings_from_interaction)) else ["x","y"] # default to x and y to maintain reference of chart
     
     # if the interaction occurs via a widget, then axis should be altered
-    interaction_occurs_on_chart = not interaction.action['trigger'] == "type"
+    interaction_occurs_on_chart = not interaction.action['trigger'] == "type" and not change_scale
+
+    # 
+   
 
     # fix the encoding scales so that the view remains static 
     if encodings and not is_undefined(encodings) and interaction_occurs_on_chart: 
         for encoding in encodings:
             field = get_field_from_encoding(chart,encoding)
-            
             if not is_undefined(chart.data) and field and field in chart.data.columns:
                 extent = extent_from_column(chart.data,field)
                 # TODO: copy the existing scale, just overwrite the domain
@@ -511,6 +519,7 @@ def highlight_chart(chart,interaction,selection):
         chart = add_encoding(chart,color)
         
     else:
+
         # used for any elements where height, width, etc are controlled by filter 
         color_encoding = chart.encoding.color
         #chart.encoding.color.scale=alt.Scale(scheme='greys')
@@ -531,7 +540,25 @@ def highlight_chart(chart,interaction,selection):
     return chart 
 
 
+class Interactions: 
+    def __init__(self,interactions):
+        self.interactions = interactions
 
+    def __add__(self, other):
+        if isinstance(other,alt.TopLevelSpec):
+            chart = other
+            for interaction in self.interactions:
+                chart = add_interaction(chart,interaction)
+            return chart
+        #chart 
+        if isinstance(other,Interaction):
+            self.interactions.append(other)
+        elif isinstance(other,Interactions):
+            self.interactions.concat(other.interactions)
+        return self
+        
+        
+    
 class Interaction:
     def __init__(self, effect, action,options=None):
         self.effect = effect
@@ -541,6 +568,10 @@ class Interaction:
 
     def __add__(self, other):
         #chart 
+        if isinstance(other,Interaction):
+            return Interactions([self,other])
+        if isinstance(other,Interactions):
+            return Interactions([self,other.interactions])
         return add_interaction(other,self)
     def __radd__(self, other):
         return self.__add__(other)
@@ -558,6 +589,7 @@ group = {"transform":"group"}
 scale_bind = {"transform":"scale_bind"}
 tooltip = {"transform":"tooltip"}
 label = {"transform":"label"}
+extent = {"transform":"filter","target":"extent"}
 
 # Input Actions
 brush = {"trigger":"drag"}
@@ -565,10 +597,14 @@ point = {"trigger":"click"}
 color = {"trigger":"click","target":"color"}
 text = {"trigger":"type"}
 brush = {"trigger":"drag"}
+slider = {"trigger":"slider"}
 #hover = {"trigger":"mouseover"}
 
-def tooltip_hover(nearest=False):
+def tooltip_hover(nearest=False,target=None):
     action = {"trigger":"mouseover"}
+    effect = tooltip
+    if target:
+        effect['target'] = target
     action['nearest'] = nearest
     return Interaction(effect=tooltip,action=action)
 
@@ -581,8 +617,13 @@ def highlight_color():
     return Interaction(effect=highlight,action=color)
 def filter_brush():
     return Interaction(effect=_filter,action=brush)
+
+def extent_brush():
+    return Interaction(effect=_filter,action=brush)
+
 def filter_point():
     return Interaction(effect=_filter,action=point)
+
 
 def group_brush():
     return Interaction(effect=group,action=brush)
