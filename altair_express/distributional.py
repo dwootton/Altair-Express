@@ -24,7 +24,7 @@ def create_hist_dataframe(data=None, *, x=None, y=None):
   
   return data,x,y
 
-def hist(data=None,x=None,y=None,color=None, max_bins=10,width=200,height=50,effects=None,x_axis = alt.Axis(),y_axis=alt.Axis()):
+def hist(data=None,x=None,y=None,color=None, max_bins=10,width=200,height=50,effects=None,x_axis = alt.Axis(),y_axis = alt.Axis() ,x_scale = alt.Scale(), y_scale= alt.Scale()):
   # ensures that data is the data and x and y are column names
   data,x,y = create_hist_dataframe(data=data,x=x,y=y) 
 
@@ -38,11 +38,11 @@ def hist(data=None,x=None,y=None,color=None, max_bins=10,width=200,height=50,eff
 
   if x is not None:
     chart = chart.mark_bar(color=fill).encode(
-            alt.X(f'{x}:Q', bin=alt.Bin(maxbins=max_bins), axis=x_axis),alt.Y('count()',axis=y_axis)
+            alt.X(f'{x}:Q', bin=alt.Bin(maxbins=max_bins),scale=x_scale, axis=x_axis),alt.Y('count()',axis=y_axis)
               ) 
   if y is not None:
     chart = chart.mark_bar(color=fill).encode(
-            alt.Y(f'{y}:Q', bin=alt.Bin(maxbins=max_bins), axis=y_axis),alt.X('count()',axis=x_axis)
+            alt.Y(f'{y}:Q', bin=alt.Bin(maxbins=max_bins),scale=y_scale, axis=y_axis),alt.X('count()',axis=x_axis)
               )
   if color:
       chart = chart.encode(

@@ -22,16 +22,16 @@ def pairplot(data=None,variables=None):
       yAxis = None
 
       if row_index == len(variables)-1 :
-         xAxis = alt.Axis()
+         x_axis = alt.Axis()
 
       if column_index == 0:
-         yAxis = alt.Axis()
+         y_axis = alt.Axis()
 
       
       if row_variable == column_variable:
        
         # ,
-        chart = hist(data,x=column_variable,yAxis=yAxis,xAxis=xAxis).properties(height=100,width=100)
+        chart = hist(data,x=column_variable,y_axis=y_axis,x_axis=x_axis).properties(height=100,width=100)
         if row_index == 0:
           chart.encoding.y.title = row_variable
         if row_index == len(variables)-1:
