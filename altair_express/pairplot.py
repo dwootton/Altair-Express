@@ -18,8 +18,9 @@ def pairplot(data=None,variables=None):
     grid_row = []
     for column_index,column_variable in enumerate(variables):
       chart = None
-      xAxis = None
-      yAxis = None
+      
+      y_axis = None
+      x_axis = None
 
       if row_index == len(variables)-1 :
          x_axis = alt.Axis()
@@ -39,7 +40,7 @@ def pairplot(data=None,variables=None):
         
       else:
        
-        chart = scatterplot(data,x=column_variable,y=row_variable,yAxis=yAxis,xAxis=xAxis).properties(height=100,width=100)
+        chart = scatterplot(data,x=column_variable,y=row_variable,y_axis=y_axis,x_axis=x_axis).properties(height=100,width=100)
       grid_row.append(chart)
 
     grid.append(grid_row)
