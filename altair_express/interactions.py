@@ -81,6 +81,7 @@ def is_encoding_meaningful(chart,encoding):
     field_is_calculated = encoding_field and any(s in encoding_field for s in RESERVED_ALX_NAMES)
 
     return not encoding_is_aggregate and not field_is_calculated
+
 def create_selection(chart,interaction):
     selection = None
     # only allow selection on an axis if it is meaningful (ie data encoded, not 'count')
@@ -151,9 +152,18 @@ def create_selection(chart,interaction):
         field = interaction.action['target']
         max = chart.data[field].max()
         min = chart.data[field].min()
+
+        #def construct_filter_transform(interaction):
+            #if interaction.effect[]:
+
+         #   return {
+         #       "filter":f"datum.{interaction.action['target']} == {interaction.action['value']}"
+         #   }
+        
+        # make step a predicate range
         step = chart.data[field].diff().dropna().unique()[0] or 1
         slider = alt.binding_range(min=min,max=max,step=step, name=f'{interaction.action["target"]}:')
-        selection = alt.selection_point(name=name, value=min,fields=[interaction.action['target']],
+        selection = alt.selection_point(name=name, nearest=True,value=min,fields=[interaction.action['target']],
                                         bind=slider)
 
     if interaction.action['trigger'] == "type":
@@ -414,7 +424,12 @@ def group_chart(chart,interaction,selection):
 # for binding based interactions, you have to use transforms directly as the interaction is not a selection
     
 def filter_chart(chart,interaction,selection):
-    filter_transform = alt.FilterTransform({"param": selection.name})
+    filter_transform = None
+    if interaction.action['trigger'] == "click":
+        val = 5
+
+    else:
+        filter_transform = alt.FilterTransform({"param": selection.name})
 
     # for text box interaction, use query filter
     #(!ALX_SELECTION_query_FILTER || test(regexp(ALX_SELECTION_query_FILTER), toString(datum['job'])))
@@ -456,6 +471,13 @@ def filter_chart(chart,interaction,selection):
 def pan_zoom_chart(chart,interaction,selection):
     return chart.add_params(selection)
 
+def create_filter_transform_for_selection(interaction, selection):
+    filter_transform = None
+    if interaction.action['trigger'] == "click":
+        val = 5
+    else: 
+        filter_transform= alt.FilterTransform({"param": selection.name})
+    return filter_transform
 def highlight_chart(chart,interaction,selection):
     # for text box interaction, use query filter
 
@@ -497,7 +519,8 @@ def highlight_chart(chart,interaction,selection):
             color='independent'
         )
 
-        filter_transform = alt.FilterTransform({"param": selection.name})
+        filter_transform = create_filter_transform_for_selection(interaction,selection)
+
         if type(chart.layer[1].transform) is not alt.utils.schemapi.UndefinedType:
             chart.layer[1].transform.insert(0,filter_transform)
         else:
@@ -731,6 +754,7 @@ def process_groups(chart,groups):
           chart = apply_effect(chart,group,parameter)
       
   return chart
+
 def add_cursor(chart,interaction):
     if interaction.action['trigger'] == "drag":
         def add_crosshair(chart):

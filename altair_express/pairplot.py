@@ -23,10 +23,10 @@ def pairplot(data=None,variables=None):
       x_axis = None
 
       if row_index == len(variables)-1 :
-         x_axis = alt.Axis()
+         x_axis = alt.Axis(titleLimit=100)
 
       if column_index == 0:
-         y_axis = alt.Axis()
+         y_axis = alt.Axis(titleLimit=100)
 
       
       if row_variable == column_variable:
