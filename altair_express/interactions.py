@@ -25,8 +25,6 @@ def add_cursor_to_mark(unit_chart,cursor_type):
 
 
 
-    
-
 def recursively_add_to_mark(chart,functions_to_call):
     for function in functions_to_call:
        chart = function(chart)
@@ -149,21 +147,13 @@ def create_selection(chart,interaction):
 
     if interaction.action['trigger'] == "slider":
         name = ALX_SELECTION_PREFIX+'slider'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
-        field = interaction.action['target']
+        field = interaction.action['field'] # target encodings, field is the field name
         max = chart.data[field].max()
         min = chart.data[field].min()
 
-        #def construct_filter_transform(interaction):
-            #if interaction.effect[]:
-
-         #   return {
-         #       "filter":f"datum.{interaction.action['target']} == {interaction.action['value']}"
-         #   }
-        
-        # make step a predicate range
-        step = chart.data[field].diff().dropna().unique()[0] or 1
-        slider = alt.binding_range(min=min,max=max,step=step, name=f'{interaction.action["target"]}:')
-        selection = alt.selection_point(name=name, nearest=True,value=min,fields=[interaction.action['target']],
+        step = 1 
+        slider = alt.binding_range(min=min,max=max,step=step, name=f'{field}:')
+        selection = alt.selection_point(name=name, nearest=True,value=min,fields=[field],
                                         bind=slider)
 
     if interaction.action['trigger'] == "type":
@@ -438,7 +428,7 @@ def filter_chart(chart,interaction,selection):
         filter_transform = alt.FilterTransform(**{"filter": query_string})
 
 
-        # insert at begining to ensure all data gets filtered correctly
+    # insert at begining to ensure all data gets filtered correctly
     if not is_undefined(chart.transform):
         chart.transform.insert(0,filter_transform)
     else:
@@ -453,8 +443,6 @@ def filter_chart(chart,interaction,selection):
     # if the interaction occurs via a widget, then axis should be altered
     interaction_occurs_on_chart = not interaction.action['trigger'] == "type" and not change_scale
 
-    # 
-   
 
     # fix the encoding scales so that the view remains static 
     if encodings and not is_undefined(encodings) and interaction_occurs_on_chart: 
@@ -658,9 +646,23 @@ def group_color():
 def pan_zoom(bind_x=True, bind_y=True):    
     return Interaction(effect=scale_bind,action={"trigger":"panzoom"},options={'bind_x':bind_x,'bind_y':bind_y})
 
-# slider functionality currently very limited, only selects the current value (not a predicate) 
-def filter_slider(field):
-    return Interaction(effect=_filter,action={"trigger":"slider","target":field})
+
+COMPARISON_MAP = {
+    "equal": {"type":"equal"},
+    "gt": {"type":"gt"},
+    "gte": {"type":"gte"},
+    "lt": {"type":"lt"},
+    "lte": {"type":"lte"},
+    "around": {"type":"around","delta":1},
+}
+
+def filter_slider(field,comparison_operator='equal',delta=None):
+    comparison = COMPARISON_MAP[comparison_operator]
+    if delta:
+        comparison['delta'] = delta
+
+    return Interaction(effect=_filter,action={"trigger":"slider","field":field,"comparison":comparison})
+
 def highlight_slider(field):
     return Interaction(effect=highlight,action={"trigger":"slider","target":field})
 

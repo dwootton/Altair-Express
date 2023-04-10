@@ -30,8 +30,6 @@ def pairplot(data=None,variables=None):
 
       
       if row_variable == column_variable:
-       
-        # ,
         chart = hist(data,x=column_variable,y_axis=y_axis,x_axis=x_axis).properties(height=100,width=100)
         if row_index == 0:
           chart.encoding.y.title = row_variable
@@ -39,8 +37,8 @@ def pairplot(data=None,variables=None):
           chart.encoding.x.title = row_variable
         
       else:
-       
         chart = scatterplot(data,x=column_variable,y=row_variable,y_axis=y_axis,x_axis=x_axis).properties(height=100,width=100)
+      
       grid_row.append(chart)
 
     grid.append(grid_row)

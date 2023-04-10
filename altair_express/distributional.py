@@ -160,7 +160,7 @@ def violin_plot(data=None,y=None,groupby=None, yAxis=None,xAxis=alt.Axis(labels=
   return final_chart
 
 
-def countplot(data=None,x=None,x_axis=alt.Axis(),y_axis=alt.Axis(),sort=None, limit=15, effects=None,width=250,height=150):
+def countplot(data=None,x=None,x_axis=alt.Axis(),y_axis=alt.Axis(),color=None,sort=None, limit=15, effects=None,width=250,height=150):
   
  
 
@@ -182,6 +182,12 @@ def countplot(data=None,x=None,x_axis=alt.Axis(),y_axis=alt.Axis(),sort=None, li
       alt.X(field=f'{x}',axis=x_axis,sort=sort), # remove the sort as that will keep it consistent with the background
       alt.Y(f'count({x}):Q',axis=y_axis)
   )
+
+  if color:
+    if color not in data.columns:
+        chart=chart.mark_bar(fill=color)
+    else:
+        chart=chart.encode(alt.Color(field=color))
    
   if effects:
     chart = process_effects(chart,effects)
