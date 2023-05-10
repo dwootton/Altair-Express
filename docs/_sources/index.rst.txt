@@ -19,4 +19,5 @@ specification affects analysis patterns.
 
     Interactions <api/interactiontechniques>
     Visualizations <api/visualizations>
+    Getting Started With Interactive Data Analysis <api/gettingstartedinteraction>
 

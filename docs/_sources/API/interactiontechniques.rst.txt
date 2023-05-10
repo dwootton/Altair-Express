@@ -4,7 +4,6 @@
 Interaction Techniques
 ============
 
-
 +-----------------------+------------------------+-----------------+--------------+
 | Interaction Techniques| Command              | Pandas Command    | Status       |
 +=======================+========================+=================+==============+
@@ -14,11 +13,7 @@ Interaction Techniques
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| :ref:`highlight-color`| alx.highlight_color()  | query           | implemented  |
-+-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-brush`| alx.highlight_brush()  | query (filter)  | implemented  |
-+-----------------------+------------------------+-----------------+--------------+
-| :ref:`highlight-point`| alx.highlight_point()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`group-point`    | alx.group_point()      | groupby         | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
