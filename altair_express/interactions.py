@@ -11,8 +11,9 @@ Interactions have effects and triggers.
 '''
 
 DEFAULT_COLORS = ["#5778a4", "#e49444", "#d1615d","#85b6b2","#6a9f58","#e7ca60","#a87c9f","#f1a2a9","#967662","#b8b0ac"]
-                  
+      
 def add_cursor_to_mark(unit_chart,cursor_type):
+    print('adding cursor new altx')
     if isinstance(unit_chart.mark,str):
         mark_type = unit_chart.mark
         unit_chart.mark = alt.MarkDef(type=mark_type,cursor=cursor_type)
@@ -21,7 +22,6 @@ def add_cursor_to_mark(unit_chart,cursor_type):
     
     
     return unit_chart
-
 
 
 
@@ -169,6 +169,7 @@ def create_selection(chart,interaction):
             encodings.append('y')
         name = ALX_SELECTION_PREFIX+'panzoom'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
         selection = alt.selection_interval(name=name,bind="scales", encodings=encodings)
+    
     
     if interaction.action['trigger'] == "mouseover":
         params = {

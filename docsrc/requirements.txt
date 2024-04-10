@@ -6,3 +6,5 @@ pillow
 pydata-sphinx-theme
 geopandas
 myst-parser
+jupyterlite_sphinx
+jupyterlite-pyodide-kernel

@@ -22,6 +22,7 @@ def is_axis_aggregate(chart,axis):
 
         axis_encode = ''
         if not is_undefined(encoding.field):
+            print(encoding.field)
             axis_encode += encoding.field
         if not is_undefined(encoding.shorthand):
             axis_encode += encoding.shorthand
