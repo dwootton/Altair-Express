@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import re
-import altair as alt
+import altair-alx-version as alt
 
 def add_encoding(chart,color):
     if getattr(chart,'encode',None) and getattr(chart,'mark',None) is not None:

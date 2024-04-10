@@ -1,5 +1,5 @@
 
-import altair as alt
+import altair-alx-version as alt
 from .distributional import hist
 from .relational import scatterplot
 import numpy as np

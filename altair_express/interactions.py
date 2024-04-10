@@ -1,7 +1,7 @@
 """Interactions module."""
 
 
-import altair as alt
+import altair-alx-version as alt
 import pandas as pd
 import numpy as np
 from .utils import add_encoding,check_axis_binned, get_field_from_encoding, check_axis_aggregate, is_undefined, alt_get, extent_from_column

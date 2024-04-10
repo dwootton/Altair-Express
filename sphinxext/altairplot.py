@@ -56,7 +56,7 @@ from docutils.parsers.rst.directives import flag, unchanged
 from sphinx.locale import _
 
 
-import altair as alt
+import altair-alx-version as alt
 from altair.utils.execeval import eval_block
 
 # These default URLs can be changed in conf.py; see setup() below.

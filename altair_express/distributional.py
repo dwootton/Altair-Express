@@ -1,5 +1,5 @@
 
-import altair as alt
+import altair-alx-version as alt
 import pandas as pd
 import numpy as np
 

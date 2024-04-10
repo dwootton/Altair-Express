@@ -1,10 +1,10 @@
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
+# export PATH="/Users/dylanwootton/miniforge3/envs/altair-express/bin:$PATH"
 [project]
 name = "altair_express"
-version = "0.1.28"
+version = "0.1.29"
 description = "Create interactive data visualizations in one line of code."
 readme = "README.rst"
 license = {text = "MIT License"}
@@ -25,7 +25,7 @@ dependencies = [
     "pandas",
     "altair",
     "numpy",
-    "altair @ https://github.com/dwootton/altair/archive/refs/tags/4.3.5.tar.gz"
+    "altair-alx-version",
 ]
 python-requirements = ">=3.6"
 urls = {homepage = "https://github.com/dwootton/altair_express"}

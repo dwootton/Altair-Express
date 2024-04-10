@@ -18,7 +18,7 @@ and
 .. altair-plot::
 
     
-import altair as alt
+import altair-alx-version as alt
 
     alt.Chart(df).mark_tick().encode(
         x='precipitation',
