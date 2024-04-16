@@ -21,7 +21,7 @@ You can compose interactions by adding them together as if you're layering multi
     overview_itx = alx.highlight_brush()
     group_itx = alx.group_color()
 
-    chart_1 = overview_itx + alx.lineplot(data=data.stocks(),x='date',xAxis=None,yAxis=None,y='price',color='symbol',height=100,width=500)
+    chart_1 = overview_itx + alx.lineplot(data=data.stocks(),x='date',x_axis=None,y_axis=None,y='price',color='symbol',height=100,width=500)
 
     # here we create the effect object by passing in the interaction object from chart_1
     effect = {"filter":overview_itx}

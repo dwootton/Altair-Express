@@ -34,7 +34,7 @@ and
     overview = alx.filter_brush()
     group_interaction = alx.group_color()
 
-    #chrt1 = overview + alx.lineplot(data=data.stocks(),x='date',x_axis=None,y_axis=None,y='price',color='symbol',height=100)
-    #chrt2 = group_interaction + alx.lineplot(data=data.stocks(),x='date',y='price',color='symbol',effects={"filter":overview})
+    chrt1 = overview + alx.lineplot(data=data.stocks(),x='date',y='price',color='symbol',height=100)
+    chrt2 = group_interaction + alx.lineplot(data=data.stocks(),x='date',y='price',color='symbol',effects={"filter":overview})
 
-    #chrt1 & chrt2
+    chrt1 & chrt2
