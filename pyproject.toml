@@ -115,7 +115,7 @@ clean-all-win = [
 ]
 build-html = [
     "mkdir -p docs/_images",
-    "sphinx-build -b html -d docs/_build/doctrees docsrc docs/_build/html",
+    "sphinx-build -b html -d docs/_build/doctrees docsrc docs/",
 ]
 build-html-win = [
     "if not exist docs\\_images md docs\\_images",
