@@ -1,4 +1,4 @@
-import altair-alx-version as alt
+import altair as alt
 from ..utils import data_type_converter, create_dataframe
 import numpy as np
 

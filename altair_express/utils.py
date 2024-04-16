@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 import re
-import altair-alx-version as alt
+import altair as alt
+from altair.utils.schemapi import _PropertySetter
+
 
 def add_encoding(chart,color):
     if getattr(chart,'encode',None) and getattr(chart,'mark',None) is not None:
@@ -21,9 +23,10 @@ def is_axis_aggregate(chart,axis):
     if encoding:
 
         axis_encode = ''
-        if not is_undefined(encoding.field):
-            print(encoding.field)
+        
+        if not is_undefined(encoding.field) and not isinstance(encoding.field, _PropertySetter):
             axis_encode += encoding.field
+
         if not is_undefined(encoding.shorthand):
             axis_encode += encoding.shorthand
 
@@ -121,7 +124,7 @@ def get_field_from_unit_encoding(chart,encoding):
     if getattr(chart,'encoding',None) == None or is_undefined(chart.encoding):
       return None
     # check if field is there
-    if not is_undefined(getattr(chart.encoding[encoding],'field','Undefined')) :
+    if not is_undefined(getattr(chart.encoding[encoding],'field','Undefined')) and not isinstance(chart.encoding[encoding].field, _PropertySetter):
         return chart.encoding[encoding].field
     elif not is_undefined(getattr(chart.encoding[encoding],'shorthand','Undefined')):
         shorthand = chart.encoding[encoding].shorthand

@@ -1,5 +1,5 @@
 
-import altair-alx-version as alt
+import altair as alt
 
 from altair_express.interactions import process_effects
 from .utils import data_type_converter, create_dataframe

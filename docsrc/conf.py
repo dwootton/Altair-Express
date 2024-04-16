@@ -356,7 +356,7 @@ numpydoc_show_class_members = False
 # For the altairplot extension
 altairplot_links = {"editor": True, "source": True, "export": True}
 
-# Defaults for below are drawn from Altair; override here.
+# Defaults for below are drawn from altair; override here.
 # altairplot_vega_js_url = "https://cdn.jsdelivr.net/npm/vega@5"
 # altairplot_vegalite_js_url = "https://cdn.jsdelivr.net/npm/vega-lite@4"
 altairplot_vegaembed_js_url = "https://cdn.jsdelivr.net/gh/dwootton/vega-embed@altair-express/build/vega-embed.min.js"#"https://cdn.jsdelivr.net/npm/vega-embed@6"

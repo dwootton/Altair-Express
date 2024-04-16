@@ -1,5 +1,5 @@
 
-import altair-alx-version as alt
+import altair as alt
 
 from .utils import is_undefined
 from .distributional import hist, countplot

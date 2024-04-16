@@ -1,5 +1,4 @@
-
-import altair-alx-version as alt
+import altair as alt
 from .distributional import hist
 from .relational import scatterplot
 from .interactions import Interaction, apply_effect, process_effects
