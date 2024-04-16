@@ -1,0 +1,29 @@
+{
+  "content": [
+    {
+      "content": null,
+      "created": "2024-04-16T21:43:32.403198Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2024-04-16T21:43:28.517057Z",
+      "mimetype": null,
+      "name": "Tutorial_Static.ipynb",
+      "path": "Tutorial_Static.ipynb",
+      "size": 959022,
+      "type": "notebook",
+      "writable": true
+    }
+  ],
+  "created": "2024-04-16T21:43:32.402678Z",
+  "format": "json",
+  "hash": null,
+  "hash_algorithm": null,
+  "last_modified": "2024-04-16T21:43:32.402678Z",
+  "mimetype": null,
+  "name": "",
+  "path": "",
+  "size": null,
+  "type": "directory",
+  "writable": true
+}
