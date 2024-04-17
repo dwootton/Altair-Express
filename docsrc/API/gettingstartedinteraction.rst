@@ -45,7 +45,6 @@ for cars by name.
     import altair_express as alx
     from vega_datasets import data
 
-
     alx.filter_type(target='Name') + alx.scatterplot(data=data.cars(),x='Horsepower',y='Miles_per_Gallon')
 
 .. note::  To interact with the above plot, enter text into the search box to filter the data points to only data whose name 

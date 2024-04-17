@@ -7,9 +7,6 @@ import numpy as np
 
 
 
-
-
-
 # Hist
 def create_hist_dataframe(data=None, *, x=None, y=None):
   # create data if x and y are pandas series

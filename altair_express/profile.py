@@ -9,6 +9,7 @@ import numpy as np
 from altair_express.interactions import process_effects
 
 def profile(data=None,vars=None,effects=None,category_limit=15):
+  print('in profile!')
   if vars is None:
     vars = data.columns
   

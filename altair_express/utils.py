@@ -204,3 +204,27 @@ def create_dataframe(data=None, *, x=None, y=None):
     else : 
       raise ValueError('[process inputs] no dataframe provided or no series from x and y')
   return data,x,y
+
+
+def to_recursive_dict(item, _visited=None):
+    if item is None:
+        return None
+    
+    if _visited is None:
+        _visited = set()
+
+    if id(item) in _visited:
+        return "<self-reference>"
+
+    _visited.add(id(item))
+
+    if isinstance(item, dict):  # If the item is a dictionary, process each key-value pair
+        return {key: to_recursive_dict(value, _visited) for key, value in item.items()}
+    elif isinstance(item, list):  # If the item is a list, process each element
+        return [to_recursive_dict(element, _visited) for element in item]
+    elif hasattr(item, "to_dict"):  # Check if the item has a to_dict method
+        return to_recursive_dict(item.to_dict(), _visited)  # Convert to dictionary and then process
+    elif hasattr(item, "__dict__"):  # Fallback if the item is an object
+        return to_recursive_dict(vars(item), _visited)  # vars() converts the object to a dictionary
+    else:
+        return item  # Return the item as it is for basic data types
