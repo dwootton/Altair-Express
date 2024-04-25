@@ -49,7 +49,8 @@ all = [
     "vegafusion[embed]>=1.6.6",
     "anywidget>=0.9.0",
     "altair_tiles>=0.3.0",
-    "altair_alx_alpha"
+    "altair_alx_alpha",
+    "jsonpatch"
 ]
 dev = [
     "hatch",

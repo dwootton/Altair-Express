@@ -79,6 +79,8 @@ def is_encoding_meaningful(chart,encoding):
 
     return not encoding_is_aggregate and not field_is_calculated
 
+
+
 def create_selection(chart,interaction):
     selection = None
     # only allow selection on an axis if it is meaningful (ie data encoded, not 'count')
@@ -88,7 +90,6 @@ def create_selection(chart,interaction):
         x_is_meaningful = is_encoding_meaningful(chart,'x')
         y_is_meaningful = is_encoding_meaningful(chart,'y')
         
-
         encodings =  [] # by default
         if x_is_meaningful :
             encodings.append('x')
@@ -105,6 +106,7 @@ def create_selection(chart,interaction):
 
         name = ALX_SELECTION_PREFIX+'drag'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
         selection = alt.selection_interval(encodings=encodings, name=name)
+
     if interaction.action['trigger'] == "click":
         name = ALX_SELECTION_PREFIX+'click'+ALX_SELECTION_SUFFIX[interaction.effect['transform']]
 
@@ -263,7 +265,7 @@ def apply_effect_recurse(previous_chart,interaction,selection):
     if interaction.effect['transform'] == "filter":
          chart = filter_chart(chart,interaction,selection)
                 
-        # if no encodings exist, 
+    # if no encodings exist, 
     if interaction.effect['transform'] == "label":
         chart = label_chart(chart,interaction,selection)
 
@@ -466,6 +468,9 @@ def create_filter_transform_for_selection(interaction, selection):
     else: 
         filter_transform= alt.FilterTransform({"param": selection.name})
     return filter_transform
+
+
+
 def highlight_chart(chart,interaction,selection):
     # for text box interaction, use query filter
 
@@ -503,6 +508,7 @@ def highlight_chart(chart,interaction,selection):
         if transform:
           chart.transform = transform
 
+        chart
         chart=chart.resolve_scale(
             color='independent'
         )
@@ -550,14 +556,111 @@ def highlight_chart(chart,interaction,selection):
 
     return chart 
 
+# from altair import TopLevelSpec, TopLevelMixin
+
+# # copy the chart over, but then also has a interactors 
+# class ALXTopLevelSpec(VegaLiteSchema):
+#     """TopLevelSpec schema wrapper
+#     A Vega-Lite top-level specification. This is the root class for all Vega-Lite
+#     specifications. (The json schema is generated from this type.)
+#     """
+
+#     _schema = {"$ref": "#/definitions/TopLevelSpec"}
+
+#     def __init__(self, *args, **kwds):
+#         super(TopLevelSpec, self).__init__(*args, **kwds)
+
+# class ALXChart():
+#     def __init__(self, *args, **kwargs):
+#         if not hasattr(self, 'chart') or self.chart is None:
+#             # Only initialize if self.chart has not been previously set
+#             object.__setattr__(self, "generators", [])
+#             #self.generators = 
+#             chart = kwargs.pop('chart', None) #alt.Chart(*args, **kwargs)
+#             object.__setattr__(self, "chart", chart)
+
+#             #self.chart = chart#deepcopy(chart)
+#         else:
+#             # Skip reinitialization if self.chart is already set
+#             print("Skipping initialization as 'chart' is already set.")
+       
+
+#     def to_dict(self):
+#         return self.chart.to_dict()
+    
+#     def __setattr__(self, name, value):
+#     # Handle specific properties that should not be passed to self.chart
+#         if name in ['chart', 'generators']:
+#             # Directly set these attributes on the ALXChart instance
+#             object.__setattr__(self, name, value)
+#         elif hasattr(self.chart, name):
+#             # Set attributes that exist in self.chart
+#             setattr(self.chart, name, value)
+#         else:
+#             # For all other attributes, fall back to the standard behavior, which may involve _kwds
+#             super().__setattr__(name, value)
+
+#     def __getattr__(self, name):
+#         """
+#         Redirect attribute access to self.chart if it's not found in ALXChart.
+#         """
+#         #print('in custom get attr',name,self.__dict__)
+#         if name in self.__dict__:
+#             return self.__dict__[name]
+#         # Directly check '__dict__' to avoid triggering any custom logic that might not be safe during initialization
+#         elif 'chart' in self.__dict__ and hasattr(self.__dict__['chart'], name):
+#             print('getting from chart',name,getattr(self.__dict__['chart'], name))
+#             return getattr(self.__dict__['chart'], name)
+#         else:
+#             raise AttributeError(f"'ALXChart' object has no attribute '{name}'")       
+
+#     def _repr_mimebundle_(self, include, exclude):
+#         return {}
+#     def __repr__(self) -> str:
+#         return str()#self.chart.__repr__()
+    
+#     def _repr_html_(self):
+#         self.display()
+#         return str()
+    
+    
+#     def display(self):
+#         # Compile the generators to create a patch
+#         print('in custom display')
+
+#         output_of_patch = [{
+#             "op": "add",
+#             "path": "/data/",
+#             "value": {"name": "element_store","values":[]}
+#         },{
+#             "op": "add",
+#             "path": "/data/-",
+#             "value": {"name": "activate_data","values":[]}
+#         }]#self.compile_generators_to_patch(self.generators)
+        
+#         # Call the original display function with the patched output
+#         return self.chart.display(validate=False, renderer='svg', patch=output_of_patch)
+        
+#     def compile_generators_to_patch(self, generators):
+#         # Implement the logic to compile generators into a patch
+#         # For example, we might merge or process some data based on the generators
+#         # This is a placeholder for the actual implementation
+#         patchs = []
+#         for generator in generators:
+#             # Assume each generator has a method to generate part of the patch
+#             part_of_patch = generator.generate_patch()
+#             patchs.append(part_of_patch)
+#         return patchs
+    
 
 class Interactions: 
     def __init__(self,interactions):
         self.interactions = interactions
 
     def __add__(self, other):
-        if isinstance(other,alt.TopLevelSpec):
-            chart = other
+        if isinstance(other,alt.TopLevelMixin):
+            chart_dict = other.to_dict()
+            # add all interactions that are 
             for interaction in self.interactions:
                 chart = add_interaction(chart,interaction)
             return chart

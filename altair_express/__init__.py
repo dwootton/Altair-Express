@@ -11,3 +11,4 @@ from .relational import *
 from .profile import *
 from .interactions import *
 from .signals import *
+from .chart_class import *
