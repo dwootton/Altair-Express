@@ -4,6 +4,36 @@ import re
 import altair as alt
 from altair.utils.schemapi import _PropertySetter
 
+def check_if_unit_line(chart):
+    
+    if isinstance(chart.mark,str):
+        return chart.mark == 'line' or chart.mark == 'area'  
+    else: 
+        return chart.mark.type == 'line' or chart.mark.type == 'area'
+
+def check_if_line(chart):
+    if hasattr(chart,'mark'):
+        return check_if_unit_line(chart)
+
+    attributes_for_recursion = ['layer','hconcat','vconcat']
+    for attribute in attributes_for_recursion:
+        # TODO: fix this following line. Right now, it enters into if for any layer, concat.
+        # instead, it should see if any exists, and if it does, it should use that as the item to search
+        if alt_get(chart,attribute):
+          for unit_spec in chart[attribute]:
+              if(check_if_line(unit_spec)):
+                return True
+    return False
+
+def is_encoding_meaningful(chart,encoding):
+    encoding_is_aggregate = check_axis_aggregate(chart,encoding) 
+    encoding_field = get_field_from_encoding(chart,encoding)
+
+    RESERVED_ALX_NAMES = ['level','jitter']
+
+    field_is_calculated = encoding_field and any(s in encoding_field for s in RESERVED_ALX_NAMES)
+
+    return not encoding_is_aggregate and not field_is_calculated
 
 def add_encoding(chart,color):
     if getattr(chart,'encode',None) and getattr(chart,'mark',None) is not None:

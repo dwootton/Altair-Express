@@ -10,5 +10,6 @@ from .distributional import *
 from .relational import *
 from .profile import *
 from .interactions import *
+from .interactors import *
 from .signals import *
 from .chart_class import *

@@ -32,7 +32,7 @@ class StoreTypes(Enum):
     Bin = "Bin" # {start, end, value}
 
 
-class Listener : Union[alt.Selection, Signal]
+class Listener : Union[alt.SelectionParameter, Signal]
 
 # these generator classes will be the internal data representation for an interactor. 
 
@@ -54,18 +54,11 @@ class Generator:
     def __init__(self, listener, name = "generator", value = "", processors = [],  type=None):
         self.name = name # 
         self.value = value
-        self.type = StoreTypes[type]
+        self.type = type
         self.processors = processors
 
         # Check if the input is an Altair selection
-        if isinstance(listener, alt.Selection): 
-            # note: selection can't be a listener as some details of selections are not known by defualt 
-            # for example, to "make" a selection for someone, you probably need to know if you should use an encoding
-            # but we don't want to require that information.
-            # lets do this, lets require that the selection can be used, but certain fn will create selection for someone. 
-            # ie highlight_brush() will create a selection when added to a chart.
-
-
+        if isinstance(listener, alt.SelectionParameter): 
             listener=listener.update(name="selection_"+name) # ensure name is consistent 
             self.value  = listener.name + "_tuple"
             self.type = StoreTypes.Selection
@@ -83,6 +76,28 @@ class Generator:
 
     def __repr__(self):
         return f"Generator with selection: {self.generator.selection}"
+    
+    def generate_patch(self):
+        patches = []
+
+        # add the listener as a signal
+        patches.append({"op":"add","path":f"/signals/-","value":self.listener})
+
+        for processor in self.processors:
+            patches.append({"op":"add","path":f"/signals/-","value":{"name":processor.name,"value":processor.expr}})
+        
+        patches.append({"op":"add","path":f"/signals/-","value":{"name":self.name+"_store","value":self.value}})
+
+        return patches
+        
+        # add the listener as a signal
+        # add each value in processor as signal 
+        # then add value as signal with name = self.name+"_store"
+
+
+
+        # use JSON patch
+        
 
 
 @dataclass
@@ -92,23 +107,125 @@ class ResponseParameters:
 
 @dataclass
 class Response:
-    ResponseFn:  Callable[[alt.Chart, Generator, ResponseParameters], alt.Chart]
+    responseFn:  Callable[[alt.Chart, Generator, ResponseParameters], alt.Chart]
+    params: Dict[str, Any] = field(default_factory=dict)
 
-# Define the ResponseFn type as a callable
+from .utils import is_encoding_meaningful,check_if_line, add_encoding,check_axis_binned, get_field_from_encoding, check_axis_aggregate, is_undefined, alt_get, extent_from_column
+
+ALX_SELECTION_PREFIX = "ALX_SELECTION_"
+ALX_SELECTION_SUFFIX= {
+    "filter":"_FILTER",
+    "scale_bind":"_FILTER",
+    "highlight":"_FILTER",
+    "group":"_GROUP",
+    "label":"_FILTER" # often used as a part of a filtering operation
+}
+# problem: how do I create selections 
+def create_selection(chart,type):
+    selection = None
+    
+    if type == "interval":
+        x_is_meaningful = is_encoding_meaningful(chart,'x')
+        y_is_meaningful = is_encoding_meaningful(chart,'y')
+        
+        encodings =  [] # by default
+        if x_is_meaningful :
+            encodings.append('x')
+        if y_is_meaningful:
+            encodings.append('y')
+
+        name = ALX_SELECTION_PREFIX+'drag'
+        selection = alt.selection_interval(encodings=encodings, name=name)
+
+    if type == "point":
+        name = ALX_SELECTION_PREFIX+'click'
+
+        selection = alt.selection_point(name=name)
+
+        x_is_aggregate = check_axis_aggregate(chart,'x') 
+        y_is_aggregate = check_axis_aggregate(chart,'y')
+
+        fields = []
+        if get_field_from_encoding(chart,'column'):
+            fields = [get_field_from_encoding(chart,'column')]
+            
+        x_field = get_field_from_encoding(chart,'x')
+        y_field = get_field_from_encoding(chart,'y')
+        RESERVED_ALX_NAMES = ['level','jitter']
+        x_is_meaningful = x_field and not any(x_field in s for s in RESERVED_ALX_NAMES) and not x_is_aggregate
+        y_is_meaningful = y_field and not any(y_field in s for s in RESERVED_ALX_NAMES) and not y_is_aggregate
+        
+        if  x_is_meaningful and not y_is_meaningful:
+            fields.append(x_field)
+            # if x is aggregated (ie is a count), then add y field to selection 
+            selection=alt.selection_point(name=name, encodings=['y'],fields=fields)
+        elif not  x_is_meaningful and  y_is_meaningful:
+            # if both of them are 
+            fields.append(y_field)
+
+            selection=alt.selection_point(name=name, encodings=['x'],fields=fields)
+        elif not x_is_meaningful and not x_is_meaningful:
+            selection=alt.selection_point(name=name, encodings=['x','y'],fields=fields)
+
+    return selection 
+
+def add_interactor(chart, interactor):
+    # generate the patch for generator 
+    # if interactor is a custom generator, then add generators to the ALX chart 
+    if interactor.generator.type != StoreTypes.Selection:
+        # custom generator, must be added to the chart later 
+        chart.add_generator(interactor.generator)
+    else: 
+        # selection generator, add to the chart directly 
+        chart = chart.add_params(interactor.generator.listener)
+
+    return interactor.response.responseFn(chart, interactor.generator, interactor.response.params)
+
+class Interactors: 
+    def __init__(self,interactors):
+        self.interactors = interactors
+
+    def __add__(self, other):
+        if isinstance(other,alt.TopLevelMixin):
+            # if added to a nonalx chart convert to ALX chart
+            chart = ALXChart(chart=other)
+            
+            for interactor in self.interactions:
+                chart = add_interactor(chart,interactor)
+            return chart
+        #chart 
+        if isinstance(other,Interactor):
+            self.interactors.append(other)
+        elif isinstance(other,Interactors):
+            self.interactors.concat(other.interactors)
+        return self
+        
+
+from .chart_class import ALXChart
 @dataclass
 class Interactor:
     generator: Generator
     response: Response  # Using string annotation for forward declaration
+
+    def __add__(self, other):
+        if isinstance(other,Interactor):
+            return Interactors([self,other])
+        elif isinstance(other,alt.TopLevelMixin):
+            # cast altair chart as ALX chart as ALX cant handle signal generators
+            chart = ALXChart(chart=other)
+            return add_interactor(chart,self)
+        elif isinstance(other,ALXChart):
+            return add_interactor(other,self)
+        elif isinstance(other, Interactors):
+            return other + self
+        
+        
 
 # brush = alt.selection_interval(encodings=['x'])
 # generator = Generator(brush)
 # response = (spec,generator) => highlight_brush(spec, generator)
 # 
 # by default selection store should just be params for a regualr selection object 
-
-
-# 
-brush = alt.selection_interval(encodings=['x']) # this is likely dependent on the spec, as how do you know if you don't want to specify x?
 
 
 
@@ -118,16 +235,6 @@ brush = alt.selection_interval(encodings=['x']) # this is likely dependent on th
 # TODO Next: verify all the same interaction techniques are transitioned over and still work
 # TODO After: go through and set up signal generators. 
 
-click = alt.selection_single(on='click')
-on_hover = alt.selection_single(on='mouseover')
-
-
-
-persistent_click = DatumClick() + Highlight()
-ephemeral_hover = DatumHover() + Highlight()
-
-
-persistent_click + ephemeral_hover + scatterplot
 
 
 # goal: 
@@ -147,3 +254,7 @@ persistent_click + ephemeral_hover + scatterplot
     # by default, if response encounters another condition, it should "or" conditions
 
     # resolution?
+
+
+# Example: barchart hover highlight 
+

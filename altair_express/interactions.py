@@ -687,6 +687,7 @@ class Interaction:
         if isinstance(other,Interactions):
             return Interactions([self,other.interactions])
         return add_interaction(other,self)
+    
     def __radd__(self, other):
         return self.__add__(other)
 
@@ -708,10 +709,11 @@ extent = {"transform":"filter","target":"extent"}
 # Input Actions
 brush = {"trigger":"drag"}
 point = {"trigger":"click"}
-color = {"trigger":"click","target":"color"}
-text = {"trigger":"type"}
-brush = {"trigger":"drag"}
+color = {"trigger":"click", "target":"color"}
+# params
 slider = {"trigger":"slider"}
+text = {"trigger":"type"}
+
 #hover = {"trigger":"mouseover"}
 
 def tooltip_hover(nearest=False,target=None):
@@ -898,8 +900,8 @@ def add_cursor(chart,interaction):
         chart = recursively_add_to_mark(chart,[add_move,add_move_to_view])
     return chart
 
+
 def add_interaction(chart, interaction):
-    
     parameter = create_selection(chart,interaction)
     interaction.set_selection(parameter)
     # spec charts need param added to the spec itself, otherwise you get duplicate signals
