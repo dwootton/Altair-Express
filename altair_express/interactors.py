@@ -75,17 +75,19 @@ class Generator:
         return NotImplemented
 
     def __repr__(self):
-        return f"Generator with selection: {self.generator.selection}"
+        return f"{self.__dict__}"
     
     def generate_patch(self):
         patches = []
 
+
         # add the listener as a signal
-        patches.append({"op":"add","path":f"/signals/-","value":self.listener})
+        patches.append({"op":"add","path":f"/signals/-","value":self.listener.to_recursive_dict()})
 
         for processor in self.processors:
             patches.append({"op":"add","path":f"/signals/-","value":{"name":processor.name,"value":processor.expr}})
         
+
         patches.append({"op":"add","path":f"/signals/-","value":{"name":self.name+"_store","value":self.value}})
 
         return patches
@@ -172,14 +174,15 @@ def create_selection(chart,type):
 def add_interactor(chart, interactor):
     # generate the patch for generator 
     # if interactor is a custom generator, then add generators to the ALX chart 
-    if interactor.generator.type != StoreTypes.Selection:
+    if not isinstance(interactor.generator.listener,alt.Parameter): # is listener 
         # custom generator, must be added to the chart later 
         chart.add_generator(interactor.generator)
     else: 
         # selection generator, add to the chart directly 
-        chart = chart.add_params(interactor.generator.listener)
-
-    return interactor.response.responseFn(chart, interactor.generator, interactor.response.params)
+        chart.chart=chart.chart.add_params(interactor.generator.listener)
+    changed_chart = interactor.response.responseFn(chart.chart, interactor.generator, interactor.response.params)
+    chart.chart = changed_chart
+    return chart
 
 class Interactors: 
     def __init__(self,interactors):
@@ -212,8 +215,8 @@ class Interactor:
             return Interactors([self,other])
         elif isinstance(other,alt.TopLevelMixin):
             # cast altair chart as ALX chart as ALX cant handle signal generators
-            chart = ALXChart(chart=other)
-            return add_interactor(chart,self)
+            alx_chart = ALXChart(chart=other)
+            return add_interactor(alx_chart,self)
         elif isinstance(other,ALXChart):
             return add_interactor(other,self)
         elif isinstance(other, Interactors):
@@ -226,8 +229,17 @@ class Interactor:
 # response = (spec,generator) => highlight_brush(spec, generator)
 # 
 # by default selection store should just be params for a regualr selection object 
-
-
+# from .signals import OnEvent
+# listen = Signal(
+#     name="zoom",
+#     value=10,
+#     on=[OnEvent(
+#         events=["wheel"],
+#         update="zoom + event.deltaY",
+#         force=True
+#     )]
+# )
+# Generator(listener=listen, name="zoom_store", value="zoom", type=StoreTypes.Numeric)
 
 # TODO: go through and create some example interaction techniques for Interactors 
 # TODO: create test infrastructure for a given Interactor and vis. 

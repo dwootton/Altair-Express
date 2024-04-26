@@ -13,3 +13,7 @@ from .interactions import *
 from .interactors import *
 from .signals import *
 from .chart_class import *
+
+
+from .itx_responses.NUM_bin_count import *
+from .itx_responses.SEL_highlight import *

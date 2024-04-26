@@ -258,3 +258,21 @@ def to_recursive_dict(item, _visited=None):
         return to_recursive_dict(vars(item), _visited)  # vars() converts the object to a dictionary
     else:
         return item  # Return the item as it is for basic data types
+    
+
+DEFAULT_COLORS = ["#5778a4", "#e49444", "#d1615d","#85b6b2","#6a9f58","#e7ca60","#a87c9f","#f1a2a9","#967662","#b8b0ac"]
+
+def add_colors(chart,data,field,legend=alt.Legend()):
+    unique_values = pd.unique(data)
+    unique_values.sort()
+    domain = ['Group']
+    range = ['black']
+    for index,value in enumerate(unique_values):
+        domain.append(value)
+        if index < len(DEFAULT_COLORS):
+            range.append(DEFAULT_COLORS[index])
+        else: 
+            range.append("lightgray")
+    color_scale = alt.Scale(domain=domain,range=range)
+    chart=chart.encode(alt.Color(field=field,scale=color_scale,legend=legend))
+    return chart
