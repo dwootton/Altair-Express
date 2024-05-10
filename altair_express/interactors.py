@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
-from typing import Union, Callable, List, Any, Dict
-from .signals import Signal
+from typing import Union, Callable, List, Any, Dict, Optional
+from .signals import Signal, Expr
 import altair as alt 
+from pydantic import BaseModel, Field
 
-Expr = alt.Expr
+
 
 @dataclass
-class Processor:
+class Processor(BaseModel):
     name: str
     expr: Expr
 
@@ -20,6 +21,7 @@ from enum import Enum
 
 class StoreTypes(Enum):
     Selection = "Selection" # any vegalite selection
+    Parameter = "Parameter"
     Numeric = "Numeric"
     String = "String"
     Enum = "Enum" # used for any field that has a limited set of values
@@ -32,7 +34,10 @@ class StoreTypes(Enum):
     Bin = "Bin" # {start, end, value}
 
 
-class Listener : Union[alt.SelectionParameter, Signal]
+# class SelectionParameter(BaseModel):
+#     test:str
+
+class Listener(BaseModel) : Union[alt.SelectionParameter, Signal]
 
 # these generator classes will be the internal data representation for an interactor. 
 
@@ -42,36 +47,59 @@ class Listener : Union[alt.SelectionParameter, Signal]
 
 # well this should specify the properties of a selection
 # specific selection details should be abstracted away. but some details might matter
+# class Listener(BaseModel) : Union[SelectionParameter, Signal]
+from typing import Literal, Sequence
 
-# how do you guantere that a listener outputs a signal name or that the processors output the required attr?
-class Generator:
+@dataclass
+class SelectionParameter(BaseModel) : 
+        name: Optional[str]
+        select: Union[
+            dict,  Literal["point", "interval"], 
+        ] 
+        bind: Optional[Union[str, dict]]
+        value: Optional[Union[
+            str,
+            bool,
+            dict,
+            None,
+            float,
+            Sequence[Union[dict]],
+        ]]
+
+
+class Generator(BaseModel):
     name: str
-    listener: Listener
-    value: Expr # Expr that evaluates to the store type
+    #listener: Listener
+    listener: Union[Signal,alt.SelectionParameter, alt.Parameter] = Field(..., description="Can be either SelectionParameter or Signal")
+    value: Union[str,Expr] # Expr that evaluates to the store type
     type: StoreTypes
     processors: List[Processor]
     """Class to handle different types of generators for interaction techniques."""
-    def __init__(self, listener, name = "generator", value = "", processors = [],  type=None):
-        self.name = name # 
-        self.value = value
-        self.type = type
-        self.processors = processors
+    def __init__(self, listener, name = "generator", value = "", processors = [],  type_param=None):
+        init_data = {
+            "name": name,
+            "value": value,
+            "processors": processors if processors is not None else [],
+            "type": type_param,
+            "listener": listener
+        }
+        if hasattr(listener,'param_type') and listener['param_type'] =='select':
+            #listener.name = "selection_" + name  # ensure name is consistent 
+            init_data["value"] = listener.name #+ "_tuple"
+            init_data["type"] = StoreTypes.Selection
+        # Properly initialize Pydantic model
+        super().__init__(**init_data)
 
-        # Check if the input is an Altair selection
-        if isinstance(listener, alt.SelectionParameter): 
-            listener=listener.update(name="selection_"+name) # ensure name is consistent 
-            self.value  = listener.name + "_tuple"
-            self.type = StoreTypes.Selection
-            
-       
-        self.listener = listener
-    
+
+    class Config:
+        arbitrary_types_allowed = True  # Allow arbitrary types
+
     def __add__(self, other):
         # TODO: allow for multiple generators to be merged into a single generator, and the stores to be updated appropriately
         # if isinstance(other, Generator):
         #     return Interactor(self, other) # merge into multiple generators, each should then be piped to through 
         if isinstance(other, Response):
-            return Interactor(self, other)
+            return Interactor(generator=self, response=other)
         return NotImplemented
 
     def __repr__(self):
@@ -79,7 +107,6 @@ class Generator:
     
     def generate_patch(self):
         patches = []
-
 
         # add the listener as a signal
         patches.append({"op":"add","path":f"/signals/-","value":self.listener.to_recursive_dict()})
@@ -103,14 +130,13 @@ class Generator:
 
 
 @dataclass
-class ResponseParameters:
+class ResponseParameters(BaseModel):
     # Additional parameters for response function
     params: Dict[str, Any] = field(default_factory=dict)
 
-@dataclass
-class Response:
-    responseFn:  Callable[[alt.Chart, Generator, ResponseParameters], alt.Chart]
-    params: Dict[str, Any] = field(default_factory=dict)
+class Response(BaseModel):
+    responseFn: Callable[[alt.Chart, 'Generator', 'ResponseParameters'], alt.Chart]
+    params: Optional[Dict[str, Any]] = Field(default=None, description="Parameters for a response function")
 
 from .utils import is_encoding_meaningful,check_if_line, add_encoding,check_axis_binned, get_field_from_encoding, check_axis_aggregate, is_undefined, alt_get, extent_from_column
 
@@ -174,26 +200,68 @@ def create_selection(chart,type):
 def add_interactor(chart, interactor):
     # generate the patch for generator 
     # if interactor is a custom generator, then add generators to the ALX chart 
-    if not isinstance(interactor.generator.listener,alt.Parameter): # is listener 
-        # custom generator, must be added to the chart later 
-        chart.add_generator(interactor.generator)
-    else: 
-        # selection generator, add to the chart directly 
-        chart.chart=chart.chart.add_params(interactor.generator.listener)
-    changed_chart = interactor.response.responseFn(chart.chart, interactor.generator, interactor.response.params)
+    
+    # Commenting out as we should move all generator compilation down
+    # if not isinstance(interactor.generator.listener,alt.Parameter): # is listener 
+    #     # custom generator, must be added to the chart later 
+    #     chart.add_generator(interactor.generator)
+    # else: 
+    #     # selection generator, add to the chart directly 
+    #     chart.chart=chart.chart.add_params(interactor.generator.listener)
+
+    chart.add_generator(interactor.generator)
+    changed_chart = chart.chart.copy(deep=True)
+    changed_chart = interactor.response.responseFn(changed_chart, interactor.generator, interactor.response.params)
     chart.chart = changed_chart
     return chart
 
-class Interactors: 
-    def __init__(self,interactors):
-        self.interactors = interactors
+# adaptors should take in a input_technique and then produce a signal, with an update that corresponds to evaluate the input to 
+# a given (adapted) output 
+class Adaptor(BaseModel):
+    def __init__(self, input, name, params=None):
+        self.input = input
+        self.params = params
+        self.update = input.name
+        self.name = name
+        # this should have all of the same properties as a generator, but should be a signal that is updated by the input technique
+
+    # if any function is called on adaptor that is not defined, then it should be passed to the input technique
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        return getattr(self.input, name)
+
+    def compile_adaptor(self):
+        input_patches =[]
+        params = []
+
+        if(not isinstance(self.input.listener,alt.Parameter)):
+            input_patches = self.input.generate_patch()
+        else: 
+            params = [self.input.listener]
+
+        input_patches.append({"op":"add","path":f"/signals/-","value":{"name":self.name,"update":self.update}})
+        return input_patches,params
+    
+    def __repr__(self):
+        return f"{self.__dict__}"
+
+
+        
+
+
+
+
+class Interactors(BaseModel): 
+    interactors: List['Interactor']
 
     def __add__(self, other):
         if isinstance(other,alt.TopLevelMixin):
             # if added to a nonalx chart convert to ALX chart
             chart = ALXChart(chart=other)
+            print('self',self)
             
-            for interactor in self.interactions:
+            for interactor in self.interactors:
                 chart = add_interactor(chart,interactor)
             return chart
         #chart 
@@ -202,17 +270,17 @@ class Interactors:
         elif isinstance(other,Interactors):
             self.interactors.concat(other.interactors)
         return self
-        
+
+
 
 from .chart_class import ALXChart
-@dataclass
-class Interactor:
+class Interactor(BaseModel):
     generator: Generator
     response: Response  # Using string annotation for forward declaration
 
     def __add__(self, other):
         if isinstance(other,Interactor):
-            return Interactors([self,other])
+            return Interactors(interactors=[self,other])
         elif isinstance(other,alt.TopLevelMixin):
             # cast altair chart as ALX chart as ALX cant handle signal generators
             alx_chart = ALXChart(chart=other)

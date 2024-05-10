@@ -1,0 +1,693 @@
+{
+    "$defs": {
+      "BindCheckbox": {
+        "properties": {
+          "element": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Element"
+          },
+          "debounce": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debounce"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "element",
+          "debounce",
+          "name"
+        ],
+        "title": "BindCheckbox",
+        "type": "object"
+      },
+      "BindDirect": {
+        "properties": {},
+        "title": "BindDirect",
+        "type": "object"
+      },
+      "BindInput": {
+        "properties": {
+          "element": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Element"
+          },
+          "debounce": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debounce"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "element",
+          "debounce",
+          "name"
+        ],
+        "title": "BindInput",
+        "type": "object"
+      },
+      "BindRadioSelect": {
+        "properties": {
+          "element": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Element"
+          },
+          "debounce": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debounce"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          }
+        },
+        "required": [
+          "element",
+          "debounce",
+          "name",
+          "options",
+          "labels"
+        ],
+        "title": "BindRadioSelect",
+        "type": "object"
+      },
+      "BindRange": {
+        "properties": {
+          "element": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Element"
+          },
+          "debounce": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debounce"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "min": {
+            "title": "Min",
+            "type": "integer"
+          },
+          "max": {
+            "title": "Max",
+            "type": "integer"
+          },
+          "step": {
+            "title": "Step",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "element",
+          "debounce",
+          "name",
+          "min",
+          "max",
+          "step"
+        ],
+        "title": "BindRange",
+        "type": "object"
+      },
+      "EventListener": {
+        "properties": {
+          "scale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale"
+          },
+          "stream": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EventStream"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signal_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SignalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "scale",
+          "stream",
+          "signal_ref"
+        ],
+        "title": "EventListener",
+        "type": "object"
+      },
+      "EventSelector": {
+        "properties": {},
+        "title": "EventSelector",
+        "type": "object"
+      },
+      "EventStream": {
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "between": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/EventStream"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Between"
+          },
+          "marktype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marktype"
+          },
+          "markname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Markname"
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Expr"
+              },
+              {
+                "items": {
+                  "$ref": "#/$defs/Expr"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Can be singular or multiple expressions",
+            "title": "Filter"
+          },
+          "throttle": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Throttle"
+          },
+          "debounce": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debounce"
+          }
+        },
+        "required": [
+          "source",
+          "type",
+          "between",
+          "marktype",
+          "markname",
+          "filter",
+          "throttle",
+          "debounce"
+        ],
+        "title": "EventStream",
+        "type": "object"
+      },
+      "Expr": {
+        "properties": {},
+        "title": "Expr",
+        "type": "object"
+      },
+      "OnEvent": {
+        "properties": {
+          "events": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EventSelector"
+              },
+              {
+                "$ref": "#/$defs/EventListener"
+              },
+              {
+                "items": {
+                  "$ref": "#/$defs/EventListener"
+                },
+                "type": "array"
+              }
+            ],
+            "description": "Can be either SelectionParameter or Signal",
+            "title": "Events"
+          },
+          "encode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encode"
+          },
+          "update": {
+            "title": "Update",
+            "type": "string"
+          },
+          "force": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Force"
+          }
+        },
+        "required": [
+          "events",
+          "encode",
+          "update",
+          "force"
+        ],
+        "title": "OnEvent",
+        "type": "object"
+      },
+      "Processor": {
+        "description": "Processor(*, name: str, expr: altair_express.signals.Expr)",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "expr": {
+            "$ref": "#/$defs/Expr"
+          }
+        },
+        "required": [
+          "name",
+          "expr"
+        ],
+        "title": "Processor",
+        "type": "object"
+      },
+      "SelectionParameter": {
+        "description": "SelectionParameter(*, name: Optional[str], select: Union[dict, Literal['point', 'interval']], bind: Union[str, dict, NoneType], value: Union[str, bool, dict, NoneType, float, Sequence[dict]])",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "select": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "enum": [
+                  "point",
+                  "interval"
+                ],
+                "type": "string"
+              }
+            ],
+            "title": "Select"
+          },
+          "bind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bind"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "name",
+          "select",
+          "bind",
+          "value"
+        ],
+        "title": "SelectionParameter",
+        "type": "object"
+      },
+      "Signal": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "on": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/OnEvent"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "update": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Update"
+          },
+          "bind": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BindCheckbox"
+              },
+              {
+                "$ref": "#/$defs/BindRadioSelect"
+              },
+              {
+                "$ref": "#/$defs/BindRange"
+              },
+              {
+                "$ref": "#/$defs/BindInput"
+              },
+              {
+                "$ref": "#/$defs/BindDirect"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Can be either SelectionParameter or Signal",
+            "title": "Bind"
+          }
+        },
+        "required": [
+          "name",
+          "on",
+          "description",
+          "value",
+          "update",
+          "bind"
+        ],
+        "title": "Signal",
+        "type": "object"
+      },
+      "SignalRef": {
+        "properties": {},
+        "title": "SignalRef",
+        "type": "object"
+      },
+      "StoreTypes": {
+        "enum": [
+          "Selection",
+          "Numeric",
+          "String",
+          "Enum",
+          "Boolean",
+          "Object",
+          "Array",
+          "DateTime",
+          "XY",
+          "Bin"
+        ],
+        "title": "StoreTypes",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "listener": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Signal"
+          },
+          {
+            "$ref": "#/$defs/SelectionParameter"
+          }
+        ],
+        "description": "Can be either SelectionParameter or Signal",
+        "title": "Listener"
+      },
+      "value": {
+        "$ref": "#/$defs/Expr"
+      },
+      "type": {
+        "$ref": "#/$defs/StoreTypes"
+      },
+      "processors": {
+        "items": {
+          "$ref": "#/$defs/Processor"
+        },
+        "title": "Processors",
+        "type": "array"
+      }
+    },
+    "required": [
+      "name",
+      "listener",
+      "value",
+      "type",
+      "processors"
+    ],
+    "title": "Generator",
+    "type": "object"
+  }

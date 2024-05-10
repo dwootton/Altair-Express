@@ -34,13 +34,11 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.githubpages",
     "sphinxext.altairplot",
-     'jupyterlite_sphinx',
     #"sphinxext.altairgallery",
     #"sphinxext.schematable",
     # "sphinxext.rediraffe",
 ]
 
-jupyterlite_contents = ["./tutorials/Tutorial_Static.ipynb"]
 
 altair_plot_links = {"editor": True, "source": False, "export": False}
 
@@ -356,8 +354,8 @@ numpydoc_show_class_members = False
 # For the altairplot extension
 altairplot_links = {"editor": True, "source": True, "export": True}
 
-# Defaults for below are drawn from altair; override here.
+# Defaults for below are drawn from Altair; override here.
 # altairplot_vega_js_url = "https://cdn.jsdelivr.net/npm/vega@5"
 # altairplot_vegalite_js_url = "https://cdn.jsdelivr.net/npm/vega-lite@4"
-altairplot_vegaembed_js_url = "https://cdn.jsdelivr.net/gh/dwootton/vega-embed@altair-express/build/vega-embed.min.js"#"https://cdn.jsdelivr.net/npm/vega-embed@6"
+altairplot_vegaembed_js_url = "https://cdn.jsdelivr.net/gh/dwootton/vega-embed/build/vega-embed.min.js"#"https://cdn.jsdelivr.net/npm/vega-embed@6"
 

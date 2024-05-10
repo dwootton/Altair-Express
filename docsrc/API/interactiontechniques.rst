@@ -9,9 +9,9 @@ Interaction Techniques
 +=======================+========================+=================+==============+
 | :ref:`filter-brush`   | alx.filter_brush()     | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
+| :ref:`filter-point`   | alx.filter_point()     | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| :ref:`highlight-point`| alx.highlight_point()  | query (filter)  | implemented  |
+| :ref:`filter-type`    | alx.filter_type()      | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`highlight-brush`| alx.highlight_brush()  | query (filter)  | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
@@ -19,7 +19,7 @@ Interaction Techniques
 +-----------------------+------------------------+-----------------+--------------+
 | :ref:`panzoom`        | alx.panzoom()          | None            | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
-| :ref:`highlight-color`| alx.highlight_color()  | query (filter)  | implemented  |
+| :ref:`highlight-color`| alx.highlight_color()  | query (filter   | implemented  |
 +-----------------------+------------------------+-----------------+--------------+
 | group_brush           | alx.group_brush()      | groupby         | in-progress  |
 +-----------------------+------------------------+-----------------+--------------+

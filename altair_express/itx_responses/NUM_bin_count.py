@@ -15,7 +15,8 @@ def get_encodings(encodings):
     end = [item for item in valid_encodings if not is_undefined(encodings[item])]
     return end
 
-
+def bin_change():
+    return Response(lambda chart,store_name,params: bin_max(chart,store_name.name))
 
 def bin_max(chart,store_name):
     for encoding_type in get_encodings(chart['encoding']):
@@ -32,3 +33,4 @@ def bin_max(chart,store_name):
 
     return chart
     
+

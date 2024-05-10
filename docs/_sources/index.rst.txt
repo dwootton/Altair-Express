@@ -21,6 +21,3 @@ specification affects analysis patterns.
     Visualizations <api/visualizations>
     Getting Started With Interactive Data Analysis <api/gettingstartedinteraction>
 
-.. jupyterlite::
-   :width: 100%
-   :height: 900px

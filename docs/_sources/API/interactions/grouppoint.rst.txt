@@ -5,3 +5,15 @@ Group Point
 ============
 
 *Group Point is used to aggregate data values together*
+
+.. altair-plot::
+
+    import altair_express as alx
+    from vega_datasets import data
+
+    alx.group_point() + alx.countplot(data=data.movies(),x='Major_Genre')
+
+Group point is often used to create data-driven groupings for further analysis.
+This can be useful for comparing different cohorts across other charts and often is
+combined with another visualization showing aggregates for different groups. 
+

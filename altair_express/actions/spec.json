@@ -1,0 +1,15 @@
+{
+    "name": "slider_store",
+    "listener": {
+        "name":"single_slider",
+        "bind": {"input": "range", "min": 1969, "max": 1981, "step": 1}
+        "on":[
+            {"events":{
+                "source":
+            },
+            "update":
+        }
+        ]
+
+    }
+}

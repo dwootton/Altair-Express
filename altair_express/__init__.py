@@ -17,3 +17,7 @@ from .chart_class import *
 
 from .itx_responses.NUM_bin_count import *
 from .itx_responses.SEL_highlight import *
+from .itx_responses.BOOL_toggle_layer import *
+from .inputs.zoom_level import *
+from .inputs.slider_single import *
+from .adaptors.numeric_comparison import *

@@ -659,7 +659,6 @@ class Interactions:
 
     def __add__(self, other):
         if isinstance(other,alt.TopLevelMixin):
-            chart_dict = other.to_dict()
             # add all interactions that are 
             for interaction in self.interactions:
                 chart = add_interaction(chart,interaction)

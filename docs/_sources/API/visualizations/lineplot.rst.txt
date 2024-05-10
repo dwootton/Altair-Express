@@ -48,5 +48,5 @@ Interactive Brush
     from vega_datasets import data
     df = data.stocks()
 
-    alx.highlight_brush() + alx.lineplot(data=df,x='date',y='price',color='symbol')
+    #alx.highlight_brush() + alx.lineplot(data=df,x='date',y='price',color='symbol')
 

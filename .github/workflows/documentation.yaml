@@ -1,31 +1,22 @@
-name: Deploy GitHub Pages
-
-on:
-  push:
-    branches:
-      - master  # Set this to your default branch if it's not 'main'
-
+name: Docs
+on: [push, pull_request, workflow_dispatch]
 jobs:
-  build-and-deploy:
+  docs:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Setup Node
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'  # Set this to the node version you need
-
-    - name: Install dependencies
-      run: npm install  # or use 'yarn'
-
-    - name: Build
-      run: npm run build  # or the command to build your site, like 'yarn build'
-
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build/_html  # Set this to your build folder
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Install dependencies
+        run: |
+          pip install sphinx sphinx_rtd_theme
+      - name: Sphinx build
+        run: |
+          sphinx-build docsrc _build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _build/
+          force_orphan: true

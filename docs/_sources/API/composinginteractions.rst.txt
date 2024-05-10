@@ -27,3 +27,14 @@ You can also isolate the effects of an interaction, and compose that directly
 and 
 
 
+.. altair-plot::
+    import altair_express as alx
+    from vega_datasets import data
+
+    overview = alx.filter_brush()
+    group_interaction = alx.group_color()
+
+    #chrt1 = overview + alx.lineplot(data=data.stocks(),x='date',x_axis=None,y_axis=None,y='price',color='symbol',height=100)
+    #chrt2 = group_interaction + alx.lineplot(data=data.stocks(),x='date',y='price',color='symbol',effects={"filter":overview})
+
+    #chrt1 & chrt2
